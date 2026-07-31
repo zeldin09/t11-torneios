@@ -16,8 +16,9 @@
   *{box-sizing:border-box; margin:0; padding:0;}
   body{background:var(--bg); color:var(--txt); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:14px; line-height:1.45; padding-bottom:80px;}
   .topbar{position:sticky; top:0; z-index:50; background:rgba(10,10,11,.92); backdrop-filter:blur(10px); border-bottom:1px solid var(--border);}
-  header{max-width:1280px; margin:0 auto; padding:14px 24px 10px; display:flex; align-items:center; gap:14px;}
-  header .logo{width:34px; height:34px; border-radius:10px; background:var(--card2); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:16px;}
+  header{max-width:1280px; margin:0 auto; padding:14px 24px 10px; display:flex; align-items:center; gap:14px; flex-wrap:wrap;}
+  header .logo{width:34px; height:34px; border-radius:10px; background:#000; border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:16px; overflow:hidden;}
+  .logo img{width:100%; height:100%; object-fit:cover; display:block;}
   header h1{font-size:16px; font-weight:600;}
   header .sub{color:var(--muted); font-size:12px;}
   header .spacer{flex:1;}
@@ -30,7 +31,7 @@
   /* ---------- Navegação por abas ---------- */
   .viewnav{display:flex; gap:2px; max-width:1280px; margin:0 auto; padding:0 10px; overflow-x:auto; scrollbar-width:none;}
   .viewnav::-webkit-scrollbar{display:none;}
-  .viewnav button{background:transparent; border:none; border-bottom:2px solid transparent; color:var(--muted); padding:10px 14px 12px; font-size:13.5px; cursor:pointer; font-family:inherit; white-space:nowrap;}
+  .viewnav button{background:transparent; border:none; border-bottom:2px solid transparent; color:var(--muted); padding:10px 14px 12px; font-size:14px; cursor:pointer; font-family:inherit; white-space:nowrap;}
   .viewnav button:hover{color:var(--txt);}
   .viewnav button.active{color:var(--green); border-bottom-color:var(--green); font-weight:600;}
   main > section.view{display:none;}
@@ -58,7 +59,7 @@
   .courts-stepper .val{font-size:20px; font-weight:700; min-width:26px; text-align:center;}
   .sessions-wrap{max-width:640px;}
   .session-row{display:grid; grid-template-columns:150px minmax(110px,1fr) 105px 105px 34px; gap:8px; margin-bottom:8px; align-items:center;}
-  .session-row .rm{width:34px; height:34px; border-radius:9px; background:var(--card2); border:1px solid var(--border); color:var(--muted); cursor:pointer; font-size:15px;}
+  .session-row .rm{width:34px; height:34px; border-radius:9px; background:var(--card2); border:1px solid var(--border); color:var(--muted); cursor:pointer; font-size:16px;}
   .session-row .rm:hover{border-color:var(--danger); color:var(--danger);}
   .session-cap{display:grid; grid-template-columns:150px minmax(110px,1fr) 105px 105px 34px; gap:8px; font-size:11px; color:var(--faint); margin-bottom:5px;}
   @media (max-width:560px){
@@ -73,16 +74,16 @@
   .cat-row::-webkit-scrollbar-track{background:transparent;}
   .cat-card{padding:14px 16px; flex:0 0 360px; width:360px; position:relative;}
   .cat-card .dot{width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:8px;}
-  .cat-card h3{font-size:15px; display:flex; align-items:center;}
+  .cat-card h3{font-size:16px; display:flex; align-items:center;}
   .cat-card .meta{color:var(--muted); font-size:12px; margin-top:4px;}
   .cat-card .actions{margin-top:12px; display:flex; gap:8px;}
-  .btn{background:var(--card2); border:1px solid var(--border); border-radius:9px; color:var(--txt); padding:7px 12px; font-size:12.5px; cursor:pointer; font-family:inherit;}
+  .btn{background:var(--card2); border:1px solid var(--border); border-radius:9px; color:var(--txt); padding:7px 12px; font-size:13px; cursor:pointer; font-family:inherit;}
   .btn:hover{border-color:var(--green-border);}
   .btn.primary{background:var(--green-dim); border-color:var(--green-border); color:var(--green); font-weight:600;}
   .btn.primary:hover{filter:brightness(1.2);}
   .btn.danger:hover{border-color:var(--danger); color:var(--danger);}
   .cat-card .plist{list-style:none; margin-top:10px; border-top:1px solid var(--border); padding-top:8px;}
-  .cat-card .plist li{display:flex; align-items:center; gap:6px; font-size:12.5px; padding:4px 2px; border-radius:7px; cursor:grab; white-space:nowrap;}
+  .cat-card .plist li{display:flex; align-items:center; gap:6px; font-size:13px; padding:4px 2px; border-radius:7px; cursor:grab; white-space:nowrap;}
   .cat-card .plist li:active{cursor:grabbing;}
   .cat-card .plist li.dragging{opacity:.35;}
   .cat-card .plist li.insert-before{box-shadow:0 -2px 0 0 var(--green);}
@@ -91,12 +92,12 @@
   .cat-card .plist .pnum{color:var(--faint); min-width:18px; text-align:right; font-variant-numeric:tabular-nums; flex-shrink:0;}
   .cat-card .plist li.seed .pnum{color:var(--green); font-weight:700;}
   .cat-card .plist .pname{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis;}
-  .cat-card .plist .stag{font-size:9px; letter-spacing:.06em; color:var(--green); background:var(--green-dim); border:1px solid var(--green-border); border-radius:5px; padding:1px 4px; white-space:nowrap; flex-shrink:0;}
+  .cat-card .plist .stag{font-size:10px; letter-spacing:.06em; color:var(--green); background:var(--green-dim); border:1px solid var(--green-border); border-radius:5px; padding:1px 4px; white-space:nowrap; flex-shrink:0;}
   .cat-card .plist .stag.bye{color:#93c5fd; background:rgba(96,165,250,.1); border-color:rgba(96,165,250,.3);}
   .cat-card .plist .prm{width:20px; height:20px; border-radius:6px; background:transparent; border:1px solid transparent; color:var(--faint); cursor:pointer; font-size:13px; line-height:1; flex-shrink:0;}
   .cat-card .plist li:hover .prm{border-color:var(--border);}
   .cat-card .plist .prm:hover{color:var(--danger); border-color:var(--danger);}
-  .cat-card .plist .pwo{height:20px; border-radius:6px; background:transparent; border:1px solid var(--border); color:var(--muted); cursor:pointer; font-size:9px; padding:0 6px; letter-spacing:.06em; flex-shrink:0; font-family:inherit;}
+  .cat-card .plist .pwo{height:20px; border-radius:6px; background:transparent; border:1px solid var(--border); color:var(--muted); cursor:pointer; font-size:10px; padding:0 6px; letter-spacing:.06em; flex-shrink:0; font-family:inherit;}
   .cat-card .plist .pwo:hover{color:var(--warn); border-color:var(--warn);}
   .cat-card .plist li.out .pname{text-decoration:line-through; color:var(--faint);}
   .cat-card .plist .stag.out{color:var(--danger); background:rgba(248,113,113,.1); border-color:rgba(248,113,113,.3);}
@@ -121,19 +122,20 @@
   .match.playable:hover{border-color:var(--green-border);}
   .match .code{font-size:10px; color:var(--faint); padding:4px 10px 0; display:flex; justify-content:space-between;}
   .match .code .score{color:var(--muted); font-variant-numeric:tabular-nums;}
-  .match .when{font-size:10.5px; color:var(--green); padding:2px 10px 4px; font-variant-numeric:tabular-nums; border-bottom:1px solid var(--border);}
+  .match .when{font-size:11px; color:var(--green); padding:2px 10px 4px; font-variant-numeric:tabular-nums; border-bottom:1px solid var(--border);}
   .side{display:flex; align-items:center; gap:8px; padding:7px 10px; border-top:1px solid transparent;}
   .side + .side{border-top:1px solid var(--border);}
   .side .seed{font-size:10px; color:var(--faint); min-width:14px;}
   .side .nm{flex:1; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-  .side .scs{display:flex; gap:5px; font-variant-numeric:tabular-nums; font-size:11.5px; color:var(--muted); flex-shrink:0;}
+  .side .scs{display:flex; gap:5px; font-variant-numeric:tabular-nums; font-size:12px; color:var(--muted); flex-shrink:0;}
   .side .sc{min-width:11px; text-align:center;}
   .side .sc.w{color:var(--txt); font-weight:700;}
   .side.winner .sc.w{color:var(--green);}
-  .side .sc.wo{font-size:9px; letter-spacing:.06em; align-self:center;}
-  .side .sc sup{font-size:8px; color:var(--muted); margin-left:1px;}
+  .side .sc.wo{font-size:10px; letter-spacing:.06em; align-self:center;}
+  .side .sc sup{font-size:10px; color:var(--muted); margin-left:1px;}
+  .side .chk{width:13px; flex-shrink:0; text-align:center; color:var(--green); font-size:12px;}
   .side.winner .sc.w sup{color:var(--green); opacity:.8;}
-  .sets input.tbin{padding:4px 6px; font-size:12.5px; opacity:.85;}
+  .sets input.tbin{padding:4px 6px; font-size:13px; opacity:.85;}
   .side.tbd .nm{color:var(--faint); font-style:italic;}
   .side.winner{background:rgba(74,222,128,.1);}
   .side.winner .nm{color:var(--green); font-weight:600;}
@@ -168,11 +170,11 @@
   .mcard .time{font-variant-numeric:tabular-nums; color:var(--txt); font-weight:600;}
   .mcard .players{font-size:13px;}
   .mcard .players .tbd{color:var(--faint); font-style:italic;}
-  .mcard .dur{font-size:10.5px; color:var(--faint); margin-top:2px;}
+  .mcard .dur{font-size:11px; color:var(--faint); margin-top:2px;}
   .mcard.done{opacity:.6; border-left-color:var(--green);}
   .mcard.done .players{text-decoration:line-through;}
   .mcard .resbtn{position:absolute; top:6px; right:8px; display:none;}
-  .gapcard{border:1.5px dashed var(--border); border-radius:10px; padding:9px 10px; display:flex; justify-content:space-between; align-items:center; font-size:11.5px; color:var(--muted); background:rgba(255,255,255,.015);}
+  .gapcard{border:1.5px dashed var(--border); border-radius:10px; padding:9px 10px; display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--muted); background:rgba(255,255,255,.015);}
   .gapcard.hot{border-color:var(--green-border); color:var(--green);}
   .gapcard button{width:22px; height:22px; border-radius:7px; background:var(--card2); border:1px solid var(--border); color:var(--muted); cursor:pointer; font-size:13px; line-height:1;}
   .gapcard button:hover{border-color:var(--danger); color:var(--danger);}
@@ -188,18 +190,18 @@
   .sday{background:var(--card); border:1px solid var(--border); border-radius:var(--r); overflow:hidden;}
   .sday-head{display:flex; justify-content:space-between; align-items:center; gap:10px; padding:10px 14px; background:var(--card2); border-bottom:1px solid var(--border);}
   .sday-head .dname{font-size:12px; letter-spacing:.12em; text-transform:uppercase; font-weight:700;}
-  .sday-head .cnt{font-size:11.5px; color:var(--muted); font-variant-numeric:tabular-nums;}
+  .sday-head .cnt{font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums;}
   .sday-scroll{overflow-x:auto;}
   .sgrid{display:grid;}
   .sgrid .corner{border-bottom:1px solid var(--border);}
-  .sgrid .chead{padding:8px 10px; font-size:12.5px; font-weight:600; border-bottom:1px solid var(--border); border-left:1px solid var(--border); white-space:nowrap;}
-  .sgrid .chead .end{color:var(--muted); font-weight:400; font-size:10.5px;}
+  .sgrid .chead{padding:8px 10px; font-size:13px; font-weight:600; border-bottom:1px solid var(--border); border-left:1px solid var(--border); white-space:nowrap;}
+  .sgrid .chead .end{color:var(--muted); font-weight:400; font-size:11px;}
   .truler{position:relative; font-size:10px; color:var(--faint); font-variant-numeric:tabular-nums;}
   .truler span{position:absolute; right:8px;}
   .tcanvas{position:relative; border-left:1px solid var(--border); background-image:linear-gradient(to bottom, rgba(255,255,255,.05) 1px, transparent 1px);}
   .tcanvas.dragover{background-color:#121a14;}
   .tcard{position:absolute; left:5px; right:5px; padding:4px 8px; overflow:hidden;}
-  .tcard .t{display:flex; justify-content:space-between; font-size:10.5px; color:var(--muted); font-variant-numeric:tabular-nums;}
+  .tcard .t{display:flex; justify-content:space-between; font-size:11px; color:var(--muted); font-variant-numeric:tabular-nums;}
   .tcard .t .ok{color:var(--green);}
   .tcard .p{font-size:12px; line-height:1.3; margin-top:1px;}
   .tcard .p .tbd{color:var(--faint); font-style:italic;}
@@ -215,14 +217,14 @@
   .tcard.live .ldot{display:inline-block;}
   @keyframes lpulse{0%,100%{opacity:1;} 50%{opacity:.25;}}
   .tcard .wb{display:flex; flex-wrap:wrap; gap:3px; margin-top:2px;}
-  .tcard .wb .badge{margin:0; font-size:9px; padding:0 4px;}
-  .tgap{position:absolute; left:5px; right:5px; padding:5px 8px; font-size:10.5px; overflow:hidden; display:flex; align-items:flex-start; background:rgba(255,255,255,.055);}
+  .tcard .wb .badge{margin:0; font-size:10px; padding:0 4px;}
+  .tgap{position:absolute; left:5px; right:5px; padding:5px 8px; font-size:11px; overflow:hidden; display:flex; align-items:flex-start; background:rgba(255,255,255,.055);}
   .tgap.imp{opacity:.75; border-style:dotted; background:rgba(255,255,255,.035);}
   .tgap.hot{background:rgba(74,222,128,.08);}
   .nowline{position:absolute; left:0; right:0; border-top:2px solid var(--green); z-index:5; pointer-events:none;}
   .nowline.off{opacity:.4; border-top-style:dashed;}
   .nowline::before{content:''; position:absolute; left:0; top:-4px; width:7px; height:7px; border-radius:50%; background:var(--green);}
-  .nowtag{position:absolute; right:4px; background:var(--green); color:#08130b; font-size:9px; font-weight:700; padding:1px 4px; border-radius:4px; z-index:5;}
+  .nowtag{position:absolute; right:4px; background:var(--green); color:#08130b; font-size:10px; font-weight:700; padding:1px 4px; border-radius:4px; z-index:5;}
   .sgrid .chead .cdot{width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:6px; vertical-align:baseline;}
 
   /* ---------- Telão (Modo TV) ---------- */
@@ -231,7 +233,7 @@
   .tv-head{display:flex; align-items:center; gap:14px; margin-bottom:16px;}
   .tv-head h1{font-size:22px; font-weight:700;}
   .tv-sub{color:var(--muted); font-size:13px;}
-  .tv-clock{margin-left:auto; font-size:30px; font-weight:800; font-variant-numeric:tabular-nums; color:var(--green);}
+  .tv-clock{margin-left:auto; font-size:30px; font-weight:700; font-variant-numeric:tabular-nums; color:var(--green);}
   .tv-close{width:38px; height:38px; border-radius:10px; background:var(--card2); border:1px solid var(--border); color:var(--muted); font-size:20px; cursor:pointer; margin-left:14px;}
   .tv-close:hover{border-color:var(--danger); color:var(--danger);}
   #tvBodyL{pointer-events:none;}
@@ -247,7 +249,7 @@
   .day-sum .range .arrow{color:var(--faint); font-weight:400;}
   .day-sum .cnt{font-size:12px; color:var(--muted); white-space:nowrap;}
   .day-sum .courts-min{grid-column:1/-1; font-size:11px; color:var(--faint); font-variant-numeric:tabular-nums;}
-  .pp-empty{color:var(--faint); font-size:12.5px; line-height:1.5;}
+  .pp-empty{color:var(--faint); font-size:13px; line-height:1.5;}
   .pp-item{display:flex; gap:12px; padding:9px 0; border-top:1px solid var(--border); font-size:13px; align-items:flex-start;}
   .pp-item:first-of-type{border-top:none;}
   .pp-when{min-width:118px; color:var(--txt); font-weight:600; font-size:12px; font-variant-numeric:tabular-nums;}
@@ -273,7 +275,7 @@
   .wopt .tag{font-size:10px; color:var(--faint); letter-spacing:.08em;}
   .sets{display:grid; grid-template-columns:70px 1fr 16px 1fr; gap:8px 10px; align-items:center; margin-bottom:14px;}
   .sets .slabel{font-size:11px; color:var(--muted);}
-  .sets input{background:var(--card2); border:1px solid var(--border); border-radius:8px; color:var(--txt); padding:7px 8px; font-size:15px; text-align:center; width:100%; font-family:inherit;}
+  .sets input{background:var(--card2); border:1px solid var(--border); border-radius:8px; color:var(--txt); padding:7px 8px; font-size:16px; text-align:center; width:100%; font-family:inherit;}
   .sets input:focus{outline:none; border-color:var(--green-border);}
   .sets .x{color:var(--faint); text-align:center;}
   .toast{position:fixed; bottom:22px; left:50%; transform:translateX(-50%); background:var(--card2); border:1px solid var(--green-border); color:var(--txt); padding:10px 18px; border-radius:12px; font-size:13px; z-index:200; display:none;}
@@ -286,13 +288,10 @@
 <div class="topbar">
   <header>
     <div class="logo">🎾</div>
-    <div>
-      <h1>Tennis T11 · Torneios</h1>
-      <div class="sub">Chaves, tempos e programação de quadras</div>
-    </div>
-    <div class="spacer"></div>
-    <span class="player-badge">👀 modo jogador · somente leitura</span>
+    <h1>Tennis T11 · Torneios</h1>
     <div class="pill" id="summaryPill">—</div>
+    <span class="player-badge">👀 modo jogador · somente leitura</span>
+    <div class="spacer"></div>
   </header>
   <nav class="viewnav" id="viewNav">
     <button class="active org" data-view="view-config" onclick="showView('view-config')">Configurações</button>
@@ -332,20 +331,20 @@
         <div class="cfg-row">
           <div>
             <label>Tempo por game</label>
-            <input type="text" inputmode="numeric" id="cfgMinGame" value="4:30" placeholder="min:seg" onchange="onCfgChange()">
+            <input type="text" inputmode="numeric" maxlength="6" id="cfgMinGame" value="4:30" placeholder="min:seg" onchange="onCfgChange()">
             <div class="hint">amador: 4:00 a 5:00</div>
           </div>
           <div>
             <label>Aquecimento</label>
-            <input type="text" inputmode="numeric" id="cfgWarmup" value="5:00" placeholder="min:seg" onchange="onCfgChange()">
+            <input type="text" inputmode="numeric" maxlength="6" id="cfgWarmup" value="5:00" placeholder="min:seg" onchange="onCfgChange()">
           </div>
           <div>
             <label>Troca entre jogos</label>
-            <input type="text" inputmode="numeric" id="cfgBuffer" value="5:00" placeholder="min:seg" onchange="onCfgChange()">
+            <input type="text" inputmode="numeric" maxlength="6" id="cfgBuffer" value="5:00" placeholder="min:seg" onchange="onCfgChange()">
           </div>
           <div>
             <label>Descanso mínimo</label>
-            <input type="text" inputmode="numeric" id="cfgRest" value="45:00" placeholder="min:seg" onchange="onCfgChange()">
+            <input type="text" inputmode="numeric" maxlength="6" id="cfgRest" value="45:00" placeholder="min:seg" onchange="onCfgChange()">
             <div class="hint">do tenista; gera alerta</div>
           </div>
         </div>
@@ -386,81 +385,81 @@
   <section class="view" id="view-help">
     <div class="eyebrow">Regras · como tudo funciona</div>
     <style>
-      .help-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:14px; max-width:1100px;}
+      .help-grid{display:flex; flex-direction:column; gap:14px;}
       .help-card{padding:16px 18px;}
       .help-card h4{margin:0 0 10px; font-size:14px; font-weight:700;}
-      .help-card ul{margin:0; padding-left:18px; font-size:13px; color:var(--muted); line-height:1.55; display:flex; flex-direction:column; gap:6px;}
-      .help-card li::marker{color:var(--faint);}
+      .help-card ul{margin:0; padding-left:0; list-style:none; font-size:13px; color:var(--muted); line-height:1.55; display:flex; flex-direction:column; gap:6px;}
+      .help-card .n{color:var(--green); font-variant-numeric:tabular-nums; font-weight:600; margin-right:7px;}
       .help-card b{color:var(--txt); font-weight:600;}
     </style>
     <div class="help-grid">
 
       <div class="card help-card">
-        <h4>⚙️ Configurações</h4>
+        <h4>1. ⚙️ Configurações</h4>
         <ul>
-          <li><b>Quadras</b>: defina a quantidade e o nome de cada uma.</li>
-          <li><b>Tempos</b>: duração estimada de cada formato de jogo (min:seg) e <b>descanso mínimo</b> entre jogos do mesmo tenista.</li>
-          <li><b>Dias do torneio</b>: data e janela de horário — o rótulo (ex.: "Sex 31/07") é gerado sozinho.</li>
+          <li><span class="n">1.1</span><b>Quadras</b>: defina a quantidade e o nome de cada uma.</li>
+          <li><span class="n">1.2</span><b>Tempos</b>: duração estimada de cada formato de jogo (min:seg) e <b>descanso mínimo</b> entre jogos do mesmo tenista.</li>
+          <li><span class="n">1.3</span><b>Dias do torneio</b>: data e janela de horário — o rótulo (ex.: "Sex 31/07") é gerado sozinho.</li>
         </ul>
       </div>
 
       <div class="card help-card">
-        <h4>👥 Categorias</h4>
+        <h4>2. 👥 Categorias</h4>
         <ul>
-          <li>Crie categorias escolhendo o <b>formato de jogo</b>: melhor de 3, sets curtos, pro-set de 8 ou 9, 2 sets + match tie-break.</li>
-          <li>Adicione ou remova jogadores e <b>arraste para ordenar o ranking</b> — a ordem define os cabeças de chave.</li>
-          <li><b>Byes</b> são calculados sozinhos e vão para os melhores rankeados.</li>
-          <li>A chave só é gerada ao clicar em <b>Sortear chave</b>.</li>
-          <li><b>W.O. / desistência</b>: decide os jogos pendentes em cascata, sem re-sortear. Antes do sorteio, o jogador pode ser substituído.</li>
+          <li><span class="n">2.1</span>Crie categorias escolhendo o <b>formato de jogo</b>: melhor de 3, sets curtos, pro-set de 8 ou 9, 2 sets + match tie-break.</li>
+          <li><span class="n">2.2</span>Adicione ou remova jogadores e <b>arraste para ordenar o ranking</b> — a ordem define os cabeças de chave.</li>
+          <li><span class="n">2.3</span><b>Byes</b> são calculados sozinhos e vão para os melhores rankeados.</li>
+          <li><span class="n">2.4</span>A chave só é gerada ao clicar em <b>Sortear chave</b>.</li>
+          <li><span class="n">2.5</span><b>W.O. / desistência</b>: decide os jogos pendentes em cascata, sem re-sortear. Antes do sorteio, o jogador pode ser substituído.</li>
         </ul>
       </div>
 
       <div class="card help-card">
-        <h4>🏆 Chaves</h4>
+        <h4>3. 🏆 Chaves</h4>
         <ul>
-          <li><b>Clique em qualquer jogo</b> (na chave ou na programação) para lançar o resultado — placar por set, com tiebreak conforme o formato.</li>
-          <li>O <b>vencedor avança sozinho</b>; byes também.</li>
-          <li>Dá para registrar o <b>término real</b> do jogo e <b>desfazer</b> um resultado lançado.</li>
+          <li><span class="n">3.1</span><b>Clique em qualquer jogo</b> (na chave ou na programação) para lançar o resultado — placar por set, com tiebreak conforme o formato.</li>
+          <li><span class="n">3.2</span>O <b>vencedor avança sozinho</b>; byes também.</li>
+          <li><span class="n">3.3</span>Dá para registrar o <b>término real</b> do jogo e <b>desfazer</b> um resultado lançado.</li>
         </ul>
       </div>
 
       <div class="card help-card">
-        <h4>📅 Programação</h4>
+        <h4>4. 📅 Programação</h4>
         <ul>
-          <li>Grade por dia e quadra, com blocos proporcionais à duração.</li>
-          <li><b>Arraste os jogos</b> para antecipar, postergar ou trocar de quadra — os horários recalculam em fila.</li>
-          <li><b>Janelas livres</b> podem ser criadas ou removidas.</li>
-          <li>Alertas: <b style="color:var(--danger)">vermelho</b> = jogo antes dos que o alimentam, ou que não cabe nos dias; <b style="color:var(--warn)">amarelo</b> = descanso mínimo violado.</li>
-          <li>A <b>linha do agora</b> corre na grade: jogo em andamento fica <b style="color:var(--green)">verde</b>; se estourar o previsto, fica <b style="color:var(--danger)">vermelho</b> e empurra a fila.</li>
-          <li><b>Redistribuir ordem padrão</b>: refaz a fila de jogos do zero.</li>
-          <li><b>Publicar alterações</b>: lista, por tenista, o que mudou desde a última publicação — pronto para avisar todo mundo.</li>
+          <li><span class="n">4.1</span>Grade por dia e quadra, com blocos proporcionais à duração.</li>
+          <li><span class="n">4.2</span><b>Arraste os jogos</b> para antecipar, postergar ou trocar de quadra — os horários recalculam em fila.</li>
+          <li><span class="n">4.3</span><b>Janelas livres</b> podem ser criadas ou removidas.</li>
+          <li><span class="n">4.4</span>Alertas: <b style="color:var(--danger)">vermelho</b> = jogo antes dos que o alimentam, ou que não cabe nos dias; <b style="color:var(--warn)">amarelo</b> = descanso mínimo violado.</li>
+          <li><span class="n">4.5</span>A <b>linha do agora</b> corre na grade: jogo em andamento fica <b style="color:var(--green)">verde</b>; se estourar o previsto, fica <b style="color:var(--danger)">vermelho</b> e empurra a fila.</li>
+          <li><span class="n">4.6</span><b>Redistribuir ordem padrão</b>: refaz a fila de jogos do zero.</li>
+          <li><span class="n">4.7</span><b>Publicar alterações</b>: lista, por tenista, o que mudou desde a última publicação — pronto para avisar todo mundo.</li>
         </ul>
       </div>
 
       <div class="card help-card">
-        <h4>🔭 Visão do evento</h4>
+        <h4>5. 🔭 Visão do evento</h4>
         <ul>
-          <li>Resumo do torneio por dia.</li>
-          <li><b>Percurso do tenista</b>: dia e horário previsto de cada rodada de um jogador — inclusive as projeções caso avance na chave.</li>
-          <li><b>Histórico de torneios</b>: ao final do evento, "Encerrar e arquivar" guarda a data, o campeão 🏆 e o vice 🥈 de cada categoria (salvo neste navegador).</li>
+          <li><span class="n">5.1</span>Resumo do torneio por dia.</li>
+          <li><span class="n">5.2</span><b>Percurso do tenista</b>: dia e horário previsto de cada rodada de um jogador — inclusive as projeções caso avance na chave.</li>
+          <li><span class="n">5.3</span><b>Histórico de torneios</b>: ao final do evento, "Encerrar e arquivar" guarda a data, o campeão 🏆 e o vice 🥈 de cada categoria (salvo neste navegador).</li>
         </ul>
       </div>
 
       <div class="card help-card">
-        <h4>📺 Modo TV</h4>
+        <h4>6. 📺 Modo TV</h4>
         <ul>
-          <li>Telão ao vivo da <b>chave</b> ou da <b>programação</b>, para exibir no clube.</li>
-          <li>Abre em janela separada (ou tela cheia, se o navegador bloquear pop-up).</li>
-          <li>Sincroniza em tempo real e <b>alterna as categorias a cada 12 segundos</b>.</li>
+          <li><span class="n">6.1</span>Telão ao vivo da <b>chave</b> ou da <b>programação</b>, para exibir no clube.</li>
+          <li><span class="n">6.2</span>Abre em janela separada (ou tela cheia, se o navegador bloquear pop-up).</li>
+          <li><span class="n">6.3</span>Sincroniza em tempo real e <b>alterna as categorias a cada 12 segundos</b>.</li>
         </ul>
       </div>
 
-      <div class="card help-card" style="grid-column:1/-1; border-color:var(--green-border); background:var(--green-dim);">
-        <h4 style="color:var(--green);">🧪 Versão de demonstração</h4>
+      <div class="card help-card" style="border-color:var(--green-border); background:var(--green-dim);">
+        <h4 style="color:var(--green);">7. 🧪 Versão de demonstração</h4>
         <ul>
-          <li>Abre com um torneio de exemplo já em andamento.</li>
-          <li><b>Nada é salvo</b> — atualizar a página (F5) reinicia tudo.</li>
-          <li>Cada visitante mexe na sua própria cópia, sem afetar os demais.</li>
+          <li><span class="n">7.1</span>Abre com um torneio de exemplo já em andamento.</li>
+          <li><span class="n">7.2</span><b>Nada é salvo</b> — atualizar a página (F5) reinicia tudo.</li>
+          <li><span class="n">7.3</span>Cada visitante mexe na sua própria cópia, sem afetar os demais.</li>
         </ul>
       </div>
 
@@ -515,7 +514,7 @@
     <div class="msub">A lista deve estar em ordem de ranking — ela define os cabeças de chave.</div>
     <div class="field">
       <label>Nome da categoria</label>
-      <input id="mName" placeholder="Ex.: Categoria A, Feminino, 45+">
+      <input id="mName" maxlength="25" placeholder="Ex.: Categoria A, Feminino, 45+">
     </div>
     <div class="field">
       <label>Formato dos jogos</label>
@@ -606,9 +605,11 @@ const FORMATS = {
 };
 const CAT_COLORS = ['var(--catA)','var(--catB)','var(--catC)','var(--catD)','var(--catE)'];
 const COURT_COLORS = ['#60a5fa','#fb923c','#a78bfa','#f472b6','#22d3ee','#facc15','#f87171','#94a3b8'];
+const LOGO='data:image/jpeg;base64,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';
 const PXM = 1.1; // pixels por minuto na grade
 const PLAYER = new URLSearchParams(location.search).has('jogador'); // modo somente leitura
 if(PLAYER) document.body.classList.add('player');
+document.querySelectorAll('.logo').forEach(el=>{ el.textContent=''; el.innerHTML='<img src="'+LOGO+'" alt="Tamboré 11">'; });
 function courtName(ci){ return (state.config.courtNames[ci]||'').trim() || ('Quadra '+(ci+1)); }
 function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 
@@ -636,6 +637,7 @@ function showView(id){
   if(typeof updateNow==='function') updateNow();
 }
 function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+function clampTxt(v,max){ return String(v||'').replace(/[<>]/g,'').replace(/\s+/g,' ').trim().slice(0,max); }
 function toMin(t){ const [h,m]=(t||'08:00').split(':').map(Number); return h*60+m; }
 function fmtT(min){ const h=Math.floor(min/60)%24, m=Math.round(min%60); return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0'); }
 const DOW=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
@@ -1001,7 +1003,7 @@ function openPublish(){
     list.innerHTML=msgs.map(m=>{
       const head = m.player!==cur ? `<div style="font-size:12px; font-weight:700; margin:12px 0 6px;">${m.player}</div>` : '';
       cur=m.player;
-      return head+`<div style="background:var(--card2); border:1px solid var(--border); border-radius:10px; padding:9px 12px; font-size:12.5px; margin-bottom:6px; line-height:1.5;">${m.txt}</div>`;
+      return head+`<div style="background:var(--card2); border:1px solid var(--border); border-radius:10px; padding:9px 12px; font-size:13px; margin-bottom:6px; line-height:1.5;">${m.txt}</div>`;
     }).join('');
   }
   $('pubModal').classList.add('open');
@@ -1098,10 +1100,10 @@ function renderCourtNames(){
   box.innerHTML='';
   for(let i=0;i<state.config.courts;i++){
     box.insertAdjacentHTML('beforeend',
-      `<div><label>Nome da quadra ${i+1}</label><input placeholder="Quadra ${i+1}" value="${(state.config.courtNames[i]||'')}" onchange="updCourtName(${i},this.value)"></div>`);
+      `<div><label>Nome da quadra ${i+1}</label><input maxlength="20" placeholder="Quadra ${i+1}" value="${(state.config.courtNames[i]||'')}" onchange="updCourtName(${i},this.value)"></div>`);
   }
 }
-function updCourtName(i,v){ state.config.courtNames[i]=v; renderSchedule(); renderExtras(); }
+function updCourtName(i,v){ state.config.courtNames[i]=clampTxt(v,20); renderSchedule(); renderExtras(); }
 function renderSessions(){
   renderCourtNames();
   const list=$('sessionsList'); list.innerHTML='';
@@ -1109,7 +1111,7 @@ function renderSessions(){
     const row=document.createElement('div'); row.className='session-row';
     row.innerHTML=`
       <input type="date" value="${s.date||''}" onchange="updSession(${i},'date',this.value)">
-      <input value="${s.label||''}" placeholder="ex.: noite" onchange="updSession(${i},'label',this.value)">
+      <input maxlength="15" value="${s.label||''}" placeholder="ex.: noite" onchange="updSession(${i},'label',this.value)">
       <input type="time" value="${s.start}" onchange="updSession(${i},'start',this.value)">
       <input type="time" value="${s.end}" onchange="updSession(${i},'end',this.value)">
       <button class="rm" title="Remover dia" onclick="rmSession(${i})">×</button>`;
@@ -1117,6 +1119,7 @@ function renderSessions(){
   });
 }
 function updSession(i,f,v){
+  if(f==='label') v=clampTxt(v,15);
   state.config.sessions[i][f]=v;
   if(f==='date'){
     // mantém os dias em ordem cronológica (sem data ficam ao final, na ordem em que estão)
@@ -1171,7 +1174,7 @@ function renderCats(){
       <div class="draw-note ${drawn && !stale?'ok':''}">${!drawn?'Aguardando sorteio da chave':stale?'Lista alterada — re-sorteie a chave para aplicar':'Chave sorteada'}</div>
       <ol class="plist">${plist}</ol>
       <div class="addp">
-        <input placeholder="Nome do novo jogador" id="np${cat.id}" onkeydown="if(event.key==='Enter')addPlayer(${cat.id})">
+        <input maxlength="30" placeholder="Nome do novo jogador" id="np${cat.id}" onkeydown="if(event.key==='Enter')addPlayer(${cat.id})">
         <button class="btn" onclick="addPlayer(${cat.id})">+ Incluir</button>
       </div>
       <div class="actions">
@@ -1189,7 +1192,7 @@ function renderCats(){
 function addPlayer(catId){
   const cat=state.cats.find(c=>c.id===catId); if(!cat)return;
   const inp=$('np'+catId);
-  const name=inp.value.trim();
+  const name=clampTxt(inp.value,30);
   if(!name){ toast('Digite o nome do jogador'); return; }
   if(cat.players.includes(name) || (cat.drawPlayers||[]).includes(name)){ toast('Este jogador já está na categoria'); return; }
   if(cat.matches){ openInclude(catId, name); return; }
@@ -1345,7 +1348,7 @@ function renderBracket(){
         } else if(m.winner===num && m.woAuto){
           scs='<span class="scs"><span class="sc wo">W.O.</span></span>';
         }
-        div.innerHTML=`<span class="seed">${rs.seed?rs.seed:''}</span><span class="nm ${rs.bye?'bye':''}">${rs.name}</span>${scs}${m.winner===num?'<span style="color:var(--green)">✓</span>':''}`;
+        div.innerHTML=`<span class="seed">${rs.seed?rs.seed:''}</span><span class="nm ${rs.bye?'bye':''}">${rs.name}</span>${scs}${m.winner?`<span class="chk">${m.winner===num?'✓':''}</span>`:''}`;
         box.appendChild(div);
       });
       if(playable){ box.title='Clique para lançar o resultado'; box.onclick=()=>openResult(cat.id, m.id); }
@@ -1577,10 +1580,10 @@ function openTV(mode){
         .tv-head{display:flex; align-items:center; gap:14px; margin-bottom:16px;}
         .tv-head h1{font-size:22px; font-weight:700;}
         .tv-sub{color:var(--muted); font-size:13px;}
-        .tv-clock{margin-left:auto; font-size:30px; font-weight:800; font-variant-numeric:tabular-nums; color:var(--green);}
+        .tv-clock{margin-left:auto; font-size:30px; font-weight:700; font-variant-numeric:tabular-nums; color:var(--green);}
         #tvBody{pointer-events:none;}
       </style></head><body>
-        <div class="tv-head"><div class="logo">🎾</div><div><h1 id="tvTitle"></h1><div class="tv-sub" id="tvSub"></div></div><div class="tv-clock" id="tvClock"></div></div>
+        <div class="tv-head"><div class="logo" style="overflow:hidden; background:#000;"><img src="${LOGO}" alt="Tamboré 11" style="width:100%; height:100%; object-fit:cover; display:block;"></div><div><h1 id="tvTitle"></h1><div class="tv-sub" id="tvSub"></div></div><div class="tv-clock" id="tvClock"></div></div>
         <div id="tvBody"></div>
       </body></html>`);
       w.document.close();
@@ -1837,8 +1840,8 @@ function openModal(){
 }
 function closeModal(){ $('modal').classList.remove('open'); }
 function saveCategory(){
-  const name=$('mName').value.trim()||('Categoria '+String.fromCharCode(64+state.cats.length+1));
-  const raw=$('mPlayers').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  const name=clampTxt($('mName').value,25)||('Categoria '+String.fromCharCode(64+state.cats.length+1));
+  const raw=$('mPlayers').value.split('\n').map(s=>clampTxt(s,30)).filter(Boolean);
   const players=[...new Set(raw)];
   if(players.length<3){ toast('Informe pelo menos 3 jogadores'); return; }
   if(players.length<raw.length) toast((raw.length-players.length)+' nome(s) duplicado(s) removido(s)');
@@ -1961,7 +1964,7 @@ function renderHistory(){
   el.innerHTML=h.map(t=>`
     <div style="background:var(--card2); border:1px solid var(--border); border-radius:12px; padding:12px 14px; margin-bottom:10px;">
       <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
-        <b style="font-size:13.5px;">${t.date}</b>
+        <b style="font-size:14px;">${t.date}</b>
         <span style="flex:1"></span>
         <button class="btn org" style="padding:1px 9px; font-size:12px;" title="Remover do histórico" onclick="rmHistory(${t.id})">×</button>
       </div>
