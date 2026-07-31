@@ -16,7 +16,7 @@
   *{box-sizing:border-box; margin:0; padding:0;}
   body{background:var(--bg); color:var(--txt); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:14px; line-height:1.45; padding-bottom:80px;}
   .topbar{position:sticky; top:0; z-index:50; background:rgba(10,10,11,.92); backdrop-filter:blur(10px); border-bottom:1px solid var(--border);}
-  header{padding:14px 24px 10px; display:flex; align-items:center; gap:14px;}
+  header{max-width:1280px; margin:0 auto; padding:14px 24px 10px; display:flex; align-items:center; gap:14px;}
   header .logo{width:34px; height:34px; border-radius:10px; background:var(--card2); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:16px;}
   header h1{font-size:16px; font-weight:600;}
   header .sub{color:var(--muted); font-size:12px;}
@@ -28,7 +28,7 @@
   section{margin-bottom:34px;}
 
   /* ---------- Navegação por abas ---------- */
-  .viewnav{display:flex; gap:2px; padding:0 16px; overflow-x:auto; scrollbar-width:none;}
+  .viewnav{display:flex; gap:2px; max-width:1280px; margin:0 auto; padding:0 10px; overflow-x:auto; scrollbar-width:none;}
   .viewnav::-webkit-scrollbar{display:none;}
   .viewnav button{background:transparent; border:none; border-bottom:2px solid transparent; color:var(--muted); padding:10px 14px 12px; font-size:13.5px; cursor:pointer; font-family:inherit; white-space:nowrap;}
   .viewnav button:hover{color:var(--txt);}
@@ -274,7 +274,7 @@
   .sets .x{color:var(--faint); text-align:center;}
   .toast{position:fixed; bottom:22px; left:50%; transform:translateX(-50%); background:var(--card2); border:1px solid var(--green-border); color:var(--txt); padding:10px 18px; border-radius:12px; font-size:13px; z-index:200; display:none;}
 
-  @media (max-width:640px){ main{padding:14px;} header{padding:12px 14px;} }
+  @media (max-width:640px){ main{padding:14px;} header{padding:12px 14px;} .viewnav{padding:0;} }
 </style>
 </head>
 <body>
@@ -380,55 +380,83 @@
   <!-- REGRAS / GUIA -->
   <section class="view" id="view-help">
     <div class="eyebrow">Regras · como tudo funciona</div>
-    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:14px; max-width:1100px;">
+    <style>
+      .help-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:14px; max-width:1100px;}
+      .help-card{padding:16px 18px;}
+      .help-card h4{margin:0 0 10px; font-size:14px; font-weight:700;}
+      .help-card ul{margin:0; padding-left:18px; font-size:13px; color:var(--muted); line-height:1.55; display:flex; flex-direction:column; gap:6px;}
+      .help-card li::marker{color:var(--faint);}
+      .help-card b{color:var(--txt); font-weight:600;}
+    </style>
+    <div class="help-grid">
 
-      <div class="card" style="padding:16px 18px;">
-        <div style="font-weight:700; margin-bottom:8px;">⚙️ Configurações</div>
-        <div style="font-size:13px; color:var(--muted); line-height:1.6;">
-          Defina a <b style="color:var(--txt)">quantidade e os nomes das quadras</b>, a <b style="color:var(--txt)">duração estimada</b> de cada formato de jogo (min:seg) e o <b style="color:var(--txt)">descanso mínimo</b> entre jogos do mesmo tenista. Cadastre os <b style="color:var(--txt)">dias do torneio</b> com data e janela de horário — o rótulo (ex.: "Sex 31/07") é gerado sozinho.
-        </div>
+      <div class="card help-card">
+        <h4>⚙️ Configurações</h4>
+        <ul>
+          <li><b>Quadras</b>: defina a quantidade e o nome de cada uma.</li>
+          <li><b>Tempos</b>: duração estimada de cada formato de jogo (min:seg) e <b>descanso mínimo</b> entre jogos do mesmo tenista.</li>
+          <li><b>Dias do torneio</b>: data e janela de horário — o rótulo (ex.: "Sex 31/07") é gerado sozinho.</li>
+        </ul>
       </div>
 
-      <div class="card" style="padding:16px 18px;">
-        <div style="font-weight:700; margin-bottom:8px;">👥 Categorias</div>
-        <div style="font-size:13px; color:var(--muted); line-height:1.6;">
-          Crie categorias escolhendo o <b style="color:var(--txt)">formato de jogo</b> (melhor de 3, sets curtos, pro-set de 8 ou 9, 2 sets + match tie-break). Adicione ou remova jogadores e <b style="color:var(--txt)">arraste para ordenar o ranking</b> — a ordem define os cabeças de chave. Os <b style="color:var(--txt)">byes</b> são calculados sozinhos e vão para os melhores rankeados. A chave só é gerada ao clicar em <b style="color:var(--txt)">Sortear chave</b>. Desistências (<b style="color:var(--txt)">W.O.</b>) decidem os jogos pendentes em cascata, sem re-sortear; antes do sorteio, o jogador pode ser substituído.
-        </div>
+      <div class="card help-card">
+        <h4>👥 Categorias</h4>
+        <ul>
+          <li>Crie categorias escolhendo o <b>formato de jogo</b>: melhor de 3, sets curtos, pro-set de 8 ou 9, 2 sets + match tie-break.</li>
+          <li>Adicione ou remova jogadores e <b>arraste para ordenar o ranking</b> — a ordem define os cabeças de chave.</li>
+          <li><b>Byes</b> são calculados sozinhos e vão para os melhores rankeados.</li>
+          <li>A chave só é gerada ao clicar em <b>Sortear chave</b>.</li>
+          <li><b>W.O. / desistência</b>: decide os jogos pendentes em cascata, sem re-sortear. Antes do sorteio, o jogador pode ser substituído.</li>
+        </ul>
       </div>
 
-      <div class="card" style="padding:16px 18px;">
-        <div style="font-weight:700; margin-bottom:8px;">🏆 Chaves</div>
-        <div style="font-size:13px; color:var(--muted); line-height:1.6;">
-          Visualize a chave completa da categoria. <b style="color:var(--txt)">Clique em qualquer jogo</b> (na chave ou no card da programação) para lançar o resultado — placar por set com tiebreak, conforme o formato. O <b style="color:var(--txt)">vencedor avança sozinho</b>; byes também. Dá para registrar o <b style="color:var(--txt)">término real</b> do jogo e <b style="color:var(--txt)">desfazer</b> um resultado lançado.
-        </div>
+      <div class="card help-card">
+        <h4>🏆 Chaves</h4>
+        <ul>
+          <li><b>Clique em qualquer jogo</b> (na chave ou na programação) para lançar o resultado — placar por set, com tiebreak conforme o formato.</li>
+          <li>O <b>vencedor avança sozinho</b>; byes também.</li>
+          <li>Dá para registrar o <b>término real</b> do jogo e <b>desfazer</b> um resultado lançado.</li>
+        </ul>
       </div>
 
-      <div class="card" style="padding:16px 18px;">
-        <div style="font-weight:700; margin-bottom:8px;">📅 Programação</div>
-        <div style="font-size:13px; color:var(--muted); line-height:1.6;">
-          Grade de horários por dia e quadra, com blocos proporcionais à duração. <b style="color:var(--txt)">Arraste os jogos</b> para antecipar, postergar ou trocar de quadra — os horários recalculam em fila. Janelas livres podem ser criadas ou removidas. Alertas: <b style="color:var(--danger)">vermelho</b> = jogo antes dos que o alimentam ou que não cabe nos dias; <b style="color:var(--warn)">amarelo</b> = descanso mínimo violado. A <b style="color:var(--txt)">linha do agora</b> corre na grade; jogo em andamento fica <b style="color:var(--green)">verde</b> e, se estourar o previsto, fica <b style="color:var(--danger)">vermelho</b> e empurra a fila. <b style="color:var(--txt)">Redistribuir ordem padrão</b> refaz a fila; <b style="color:var(--txt)">Publicar alterações</b> lista, por tenista, o que mudou desde a última publicação — pronto para avisar todo mundo.
-        </div>
+      <div class="card help-card">
+        <h4>📅 Programação</h4>
+        <ul>
+          <li>Grade por dia e quadra, com blocos proporcionais à duração.</li>
+          <li><b>Arraste os jogos</b> para antecipar, postergar ou trocar de quadra — os horários recalculam em fila.</li>
+          <li><b>Janelas livres</b> podem ser criadas ou removidas.</li>
+          <li>Alertas: <b style="color:var(--danger)">vermelho</b> = jogo antes dos que o alimentam, ou que não cabe nos dias; <b style="color:var(--warn)">amarelo</b> = descanso mínimo violado.</li>
+          <li>A <b>linha do agora</b> corre na grade: jogo em andamento fica <b style="color:var(--green)">verde</b>; se estourar o previsto, fica <b style="color:var(--danger)">vermelho</b> e empurra a fila.</li>
+          <li><b>Redistribuir ordem padrão</b>: refaz a fila de jogos do zero.</li>
+          <li><b>Publicar alterações</b>: lista, por tenista, o que mudou desde a última publicação — pronto para avisar todo mundo.</li>
+        </ul>
       </div>
 
-      <div class="card" style="padding:16px 18px;">
-        <div style="font-weight:700; margin-bottom:8px;">🔭 Visão do evento</div>
-        <div style="font-size:13px; color:var(--muted); line-height:1.6;">
-          Resumo do torneio por dia e o <b style="color:var(--txt)">Percurso do tenista</b>: escolha um jogador e veja dia e horário previsto de cada rodada dele — inclusive as projeções caso avance na chave.
-        </div>
+      <div class="card help-card">
+        <h4>🔭 Visão do evento</h4>
+        <ul>
+          <li>Resumo do torneio por dia.</li>
+          <li><b>Percurso do tenista</b>: dia e horário previsto de cada rodada de um jogador — inclusive as projeções caso avance na chave.</li>
+          <li><b>Histórico de torneios</b>: ao final do evento, "Encerrar e arquivar" guarda a data, o campeão 🏆 e o vice 🥈 de cada categoria (salvo neste navegador).</li>
+        </ul>
       </div>
 
-      <div class="card" style="padding:16px 18px;">
-        <div style="font-weight:700; margin-bottom:8px;">📺 Modo TV</div>
-        <div style="font-size:13px; color:var(--muted); line-height:1.6;">
-          Telão ao vivo da <b style="color:var(--txt)">chave</b> ou da <b style="color:var(--txt)">programação</b>, para exibir no clube. Abre em janela separada (ou tela cheia, se o navegador bloquear pop-up), sincroniza em tempo real e <b style="color:var(--txt)">alterna as categorias a cada 12 segundos</b>.
-        </div>
+      <div class="card help-card">
+        <h4>📺 Modo TV</h4>
+        <ul>
+          <li>Telão ao vivo da <b>chave</b> ou da <b>programação</b>, para exibir no clube.</li>
+          <li>Abre em janela separada (ou tela cheia, se o navegador bloquear pop-up).</li>
+          <li>Sincroniza em tempo real e <b>alterna as categorias a cada 12 segundos</b>.</li>
+        </ul>
       </div>
 
-      <div class="card" style="padding:16px 18px; grid-column:1/-1; border-color:var(--green-border); background:var(--green-dim);">
-        <div style="font-weight:700; margin-bottom:8px; color:var(--green);">🧪 Versão de demonstração</div>
-        <div style="font-size:13px; color:var(--muted); line-height:1.6;">
-          Esta é uma prévia para testes: ela abre com um torneio de exemplo já em andamento e <b style="color:var(--txt)">nada é salvo</b> — atualizar a página (F5) reinicia tudo. Explore à vontade: cada visitante mexe na sua própria cópia, sem afetar os demais.
-        </div>
+      <div class="card help-card" style="grid-column:1/-1; border-color:var(--green-border); background:var(--green-dim);">
+        <h4 style="color:var(--green);">🧪 Versão de demonstração</h4>
+        <ul>
+          <li>Abre com um torneio de exemplo já em andamento.</li>
+          <li><b>Nada é salvo</b> — atualizar a página (F5) reinicia tudo.</li>
+          <li>Cada visitante mexe na sua própria cópia, sem afetar os demais.</li>
+        </ul>
       </div>
 
     </div>
@@ -444,6 +472,13 @@
         <select id="pathSel" onchange="renderPlayerPath()" style="width:100%; background:var(--card2); border:1px solid var(--border); border-radius:9px; color:var(--txt); padding:8px 10px; font-size:14px; font-family:inherit; margin-bottom:12px;"></select>
         <div id="playerPath"></div>
       </div>
+    </div>
+    <div class="card" style="margin-top:14px;">
+      <div class="ov-title" style="display:flex; align-items:center; gap:10px;">🏆 Histórico de torneios
+        <span style="flex:1"></span>
+        <button class="btn" onclick="archiveTournament()">Encerrar e arquivar torneio</button>
+      </div>
+      <div id="historyList"></div>
     </div>
   </section>
 
@@ -1878,6 +1913,55 @@ function seedDemo(){
   });
   render();
 }
+/* ================= HISTÓRICO DE TORNEIOS ================= */
+function loadHistory(){ try{ return JSON.parse(localStorage.getItem('t11_history')||'[]'); }catch(e){ return window.__histMem||[]; } }
+function saveHistory(h){ try{ localStorage.setItem('t11_history', JSON.stringify(h)); }catch(e){ window.__histMem=h; } }
+function catFinal(cat){
+  if(!cat.matches) return null;
+  const f=cat.matches.find(m=>m.round===cat.rounds-1);
+  if(!f || !f.winner) return null;
+  const w=resolveSide(cat, f.winner===1?f.p1:f.p2), l=resolveSide(cat, f.winner===1?f.p2:f.p1);
+  if(!w.known || !l.known) return null;
+  return {champion:w.name, vice:l.name, score:scoreStr(f)};
+}
+function eventDateLabel(){
+  const ds=state.config.sessions.filter(s=>s.date).map(s=>s.date).sort();
+  const fmt=d=>{ const x=d.split('-'); return x[2]+'/'+x[1]+'/'+x[0]; };
+  if(!ds.length){ const n=new Date(); return String(n.getDate()).padStart(2,'0')+'/'+String(n.getMonth()+1).padStart(2,'0')+'/'+n.getFullYear(); }
+  return ds.length>1 ? fmt(ds[0])+' – '+fmt(ds[ds.length-1]) : fmt(ds[0]);
+}
+function archiveTournament(){
+  const done=[], pend=[];
+  state.cats.forEach(c=>{
+    const f=catFinal(c);
+    if(f) done.push({name:c.name, format:FORMATS[c.format].label, champion:f.champion, vice:f.vice, score:f.score});
+    else if(c.matches) pend.push(c.name);
+  });
+  if(!done.length){ toast('Nenhuma categoria com final decidida ainda — conclua ao menos uma final para arquivar.'); return; }
+  const h=loadHistory();
+  h.unshift({id:Date.now(), date:eventDateLabel(), cats:done});
+  saveHistory(h); renderHistory();
+  toast('Torneio arquivado no histórico'+(pend.length? ' (sem final decidida: '+pend.join(', ')+')' : ''));
+}
+function rmHistory(id){ saveHistory(loadHistory().filter(x=>x.id!==id)); renderHistory(); }
+function renderHistory(){
+  const el=$('historyList'); if(!el) return;
+  const h=loadHistory();
+  if(!h.length){
+    el.innerHTML='<div class="pp-empty">Nenhum torneio arquivado. Quando as finais forem decididas, clique em "Encerrar e arquivar torneio" — o campeão e o vice de cada categoria ficam guardados aqui, neste navegador.</div>';
+    return;
+  }
+  el.innerHTML=h.map(t=>`
+    <div style="background:var(--card2); border:1px solid var(--border); border-radius:12px; padding:12px 14px; margin-bottom:10px;">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+        <b style="font-size:13.5px;">${t.date}</b>
+        <span style="flex:1"></span>
+        <button class="btn" style="padding:1px 9px; font-size:12px;" title="Remover do histórico" onclick="rmHistory(${t.id})">×</button>
+      </div>
+      ${t.cats.map(c=>`<div style="font-size:13px; color:var(--muted); line-height:1.8;"><b style="color:var(--txt)">${c.name}</b> &nbsp;·&nbsp; 🏆 ${c.champion} &nbsp;·&nbsp; 🥈 ${c.vice}${c.score? ' <span style="color:var(--faint)">('+c.score+')</span>' : ''}</div>`).join('')}
+    </div>`).join('');
+}
+renderHistory();
 seedDemo();
 </script>
 </body>
