@@ -295,6 +295,7 @@
     <button data-view="view-bracket" onclick="showView('view-bracket')">Chaves</button>
     <button data-view="view-sched" onclick="showView('view-sched')">Programação</button>
     <button data-view="view-overview" onclick="showView('view-overview')">Visão do evento</button>
+    <button data-view="view-help" onclick="showView('view-help')">Regras</button>
   </nav>
 </div>
 
@@ -373,6 +374,63 @@
     <div class="card">
       <div class="bracket-wrap"><div class="bracket" id="bracket"></div></div>
       <div class="bracket-hint">Clique em um jogo (na chave ou no card da programação) para lançar o resultado. O vencedor avança automaticamente; byes avançam sozinhos. Desistências são marcadas pelo botão W.O. no card da categoria e decidem os jogos pendentes em cascata.</div>
+    </div>
+  </section>
+
+  <!-- REGRAS / GUIA -->
+  <section class="view" id="view-help">
+    <div class="eyebrow">Regras · como tudo funciona</div>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:14px; max-width:1100px;">
+
+      <div class="card" style="padding:16px 18px;">
+        <div style="font-weight:700; margin-bottom:8px;">⚙️ Configurações</div>
+        <div style="font-size:13px; color:var(--muted); line-height:1.6;">
+          Defina a <b style="color:var(--txt)">quantidade e os nomes das quadras</b>, a <b style="color:var(--txt)">duração estimada</b> de cada formato de jogo (min:seg) e o <b style="color:var(--txt)">descanso mínimo</b> entre jogos do mesmo tenista. Cadastre os <b style="color:var(--txt)">dias do torneio</b> com data e janela de horário — o rótulo (ex.: "Sex 31/07") é gerado sozinho.
+        </div>
+      </div>
+
+      <div class="card" style="padding:16px 18px;">
+        <div style="font-weight:700; margin-bottom:8px;">👥 Categorias</div>
+        <div style="font-size:13px; color:var(--muted); line-height:1.6;">
+          Crie categorias escolhendo o <b style="color:var(--txt)">formato de jogo</b> (melhor de 3, sets curtos, pro-set de 8 ou 9, 2 sets + match tie-break). Adicione ou remova jogadores e <b style="color:var(--txt)">arraste para ordenar o ranking</b> — a ordem define os cabeças de chave. Os <b style="color:var(--txt)">byes</b> são calculados sozinhos e vão para os melhores rankeados. A chave só é gerada ao clicar em <b style="color:var(--txt)">Sortear chave</b>. Desistências (<b style="color:var(--txt)">W.O.</b>) decidem os jogos pendentes em cascata, sem re-sortear; antes do sorteio, o jogador pode ser substituído.
+        </div>
+      </div>
+
+      <div class="card" style="padding:16px 18px;">
+        <div style="font-weight:700; margin-bottom:8px;">🏆 Chaves</div>
+        <div style="font-size:13px; color:var(--muted); line-height:1.6;">
+          Visualize a chave completa da categoria. <b style="color:var(--txt)">Clique em qualquer jogo</b> (na chave ou no card da programação) para lançar o resultado — placar por set com tiebreak, conforme o formato. O <b style="color:var(--txt)">vencedor avança sozinho</b>; byes também. Dá para registrar o <b style="color:var(--txt)">término real</b> do jogo e <b style="color:var(--txt)">desfazer</b> um resultado lançado.
+        </div>
+      </div>
+
+      <div class="card" style="padding:16px 18px;">
+        <div style="font-weight:700; margin-bottom:8px;">📅 Programação</div>
+        <div style="font-size:13px; color:var(--muted); line-height:1.6;">
+          Grade de horários por dia e quadra, com blocos proporcionais à duração. <b style="color:var(--txt)">Arraste os jogos</b> para antecipar, postergar ou trocar de quadra — os horários recalculam em fila. Janelas livres podem ser criadas ou removidas. Alertas: <b style="color:var(--danger)">vermelho</b> = jogo antes dos que o alimentam ou que não cabe nos dias; <b style="color:var(--warn)">amarelo</b> = descanso mínimo violado. A <b style="color:var(--txt)">linha do agora</b> corre na grade; jogo em andamento fica <b style="color:var(--green)">verde</b> e, se estourar o previsto, fica <b style="color:var(--danger)">vermelho</b> e empurra a fila. <b style="color:var(--txt)">Redistribuir ordem padrão</b> refaz a fila; <b style="color:var(--txt)">Publicar alterações</b> lista, por tenista, o que mudou desde a última publicação — pronto para avisar todo mundo.
+        </div>
+      </div>
+
+      <div class="card" style="padding:16px 18px;">
+        <div style="font-weight:700; margin-bottom:8px;">🔭 Visão do evento</div>
+        <div style="font-size:13px; color:var(--muted); line-height:1.6;">
+          Resumo do torneio por dia e o <b style="color:var(--txt)">Percurso do tenista</b>: escolha um jogador e veja dia e horário previsto de cada rodada dele — inclusive as projeções caso avance na chave.
+        </div>
+      </div>
+
+      <div class="card" style="padding:16px 18px;">
+        <div style="font-weight:700; margin-bottom:8px;">📺 Modo TV</div>
+        <div style="font-size:13px; color:var(--muted); line-height:1.6;">
+          Telão ao vivo da <b style="color:var(--txt)">chave</b> ou da <b style="color:var(--txt)">programação</b>, para exibir no clube. Abre em janela separada (ou tela cheia, se o navegador bloquear pop-up), sincroniza em tempo real e <b style="color:var(--txt)">alterna as categorias a cada 12 segundos</b>.
+        </div>
+      </div>
+
+      <div class="card" style="padding:16px 18px; grid-column:1/-1; border-color:var(--green-border); background:var(--green-dim);">
+        <div style="font-weight:700; margin-bottom:8px; color:var(--green);">🧪 Versão de demonstração</div>
+        <div style="font-size:13px; color:var(--muted); line-height:1.6;">
+          Esta é uma prévia para testes: ela abre com um torneio de exemplo já em andamento e <b style="color:var(--txt)">nada é salvo</b> — atualizar a página (F5) reinicia tudo. Explore à vontade: cada visitante mexe na sua própria cópia, sem afetar os demais.
+        </div>
+      </div>
+
     </div>
   </section>
 
@@ -1453,8 +1511,10 @@ function updateNow(){
   // jogo estourou o previsto sem resultado: re-renderiza para esticar o bloco e empurrar a fila
   const overdue=[...document.querySelectorAll('.tcard')].some(c=>
     c.dataset.date===ds && !c.classList.contains('done') && +c.dataset.s<=nm && nm >= +c.dataset.e);
-  if(overdue && !document.querySelector('.dragging')){
-    renderSchedule(); renderSummary(); renderExtras();
+  if(overdue && !document.querySelector('.dragging') && !updateNow._busy){
+    updateNow._busy=true;
+    try{ renderSchedule(); renderSummary(); renderExtras(); }
+    finally{ updateNow._busy=false; }
   }
   syncTV();
 }
