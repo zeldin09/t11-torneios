@@ -1,0 +1,1824 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tennis T11 — Torneios</title>
+<style>
+  :root{
+    --bg:#0a0a0b; --card:#151517; --card2:#1c1c20; --border:#27272c;
+    --txt:#f4f4f5; --muted:#8b8b93; --faint:#5c5c64;
+    --green:#4ade80; --green-dim:#14351f; --green-border:#1f6b3a;
+    --warn:#fbbf24; --danger:#f87171;
+    --catA:#4ade80; --catB:#60a5fa; --catC:#fb923c; --catD:#f472b6; --catE:#a78bfa;
+    --r:14px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--bg); color:var(--txt); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:14px; line-height:1.45; padding-bottom:80px;}
+  .topbar{position:sticky; top:0; z-index:50; background:rgba(10,10,11,.92); backdrop-filter:blur(10px); border-bottom:1px solid var(--border);}
+  header{padding:14px 24px 10px; display:flex; align-items:center; gap:14px;}
+  header .logo{width:34px; height:34px; border-radius:10px; background:var(--card2); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:16px;}
+  header h1{font-size:16px; font-weight:600;}
+  header .sub{color:var(--muted); font-size:12px;}
+  header .spacer{flex:1;}
+  .pill{background:var(--card2); border:1px solid var(--border); border-radius:999px; padding:5px 12px; font-size:12px; color:var(--muted);}
+  .pill b{color:var(--txt);}
+  main{max-width:1280px; margin:0 auto; padding:24px;}
+  .eyebrow{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--faint); margin-bottom:8px;}
+  section{margin-bottom:34px;}
+
+  /* ---------- Navegação por abas ---------- */
+  .viewnav{display:flex; gap:2px; padding:0 16px; overflow-x:auto; scrollbar-width:none;}
+  .viewnav::-webkit-scrollbar{display:none;}
+  .viewnav button{background:transparent; border:none; border-bottom:2px solid transparent; color:var(--muted); padding:10px 14px 12px; font-size:13.5px; cursor:pointer; font-family:inherit; white-space:nowrap;}
+  .viewnav button:hover{color:var(--txt);}
+  .viewnav button.active{color:var(--green); border-bottom-color:var(--green); font-weight:600;}
+  main > section.view{display:none;}
+  main > section.view.active{display:block;}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:var(--r);}
+
+  /* ---------- Config ---------- */
+  #configCard{padding:0; max-width:860px;}
+  .cfg-sec{padding:18px 20px;}
+  .cfg-sec + .cfg-sec{border-top:1px solid var(--border);}
+  .cfg-title{font-size:13px; font-weight:600; margin-bottom:2px;}
+  .cfg-sub{font-size:12px; color:var(--muted); margin-bottom:14px;}
+  .cfg-row{display:flex; flex-wrap:wrap; gap:14px 22px; align-items:flex-start;}
+  .cfg-row > div{width:150px;}
+  .cfg label{display:block; font-size:11px; color:var(--muted); margin-bottom:5px;}
+  .cfg input,.cfg select, .field input, .field select, .field textarea{
+    width:100%; background:var(--card2); border:1px solid var(--border); border-radius:9px;
+    color:var(--txt); padding:8px 10px; font-size:14px; font-family:inherit;
+  }
+  .cfg input:focus, .field input:focus, .field select:focus, .field textarea:focus, .cfg select:focus{outline:none; border-color:var(--green-border);}
+  .cfg .hint{font-size:11px; color:var(--faint); margin-top:4px;}
+  .courts-stepper{display:flex; align-items:center; gap:10px;}
+  .courts-stepper button{width:34px; height:34px; border-radius:9px; background:var(--card2); border:1px solid var(--border); color:var(--txt); font-size:18px; cursor:pointer;}
+  .courts-stepper button:hover{border-color:var(--green-border);}
+  .courts-stepper .val{font-size:20px; font-weight:700; min-width:26px; text-align:center;}
+  .sessions-wrap{max-width:640px;}
+  .session-row{display:grid; grid-template-columns:150px minmax(110px,1fr) 105px 105px 34px; gap:8px; margin-bottom:8px; align-items:center;}
+  .session-row .rm{width:34px; height:34px; border-radius:9px; background:var(--card2); border:1px solid var(--border); color:var(--muted); cursor:pointer; font-size:15px;}
+  .session-row .rm:hover{border-color:var(--danger); color:var(--danger);}
+  .session-cap{display:grid; grid-template-columns:150px minmax(110px,1fr) 105px 105px 34px; gap:8px; font-size:11px; color:var(--faint); margin-bottom:5px;}
+  @media (max-width:560px){
+    .session-row,.session-cap{grid-template-columns:130px 1fr 90px 90px 30px;}
+    .cfg-row > div{width:calc(50% - 11px);}
+  }
+
+  /* ---------- Categorias ---------- */
+  .cat-row{display:flex; flex-wrap:nowrap; gap:12px; overflow-x:auto; align-items:flex-start; padding-bottom:10px; scrollbar-width:thin; scrollbar-color:var(--border) transparent;}
+  .cat-row::-webkit-scrollbar{height:8px;}
+  .cat-row::-webkit-scrollbar-thumb{background:var(--border); border-radius:4px;}
+  .cat-row::-webkit-scrollbar-track{background:transparent;}
+  .cat-card{padding:14px 16px; flex:0 0 360px; width:360px; position:relative;}
+  .cat-card .dot{width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:8px;}
+  .cat-card h3{font-size:15px; display:flex; align-items:center;}
+  .cat-card .meta{color:var(--muted); font-size:12px; margin-top:4px;}
+  .cat-card .actions{margin-top:12px; display:flex; gap:8px;}
+  .btn{background:var(--card2); border:1px solid var(--border); border-radius:9px; color:var(--txt); padding:7px 12px; font-size:12.5px; cursor:pointer; font-family:inherit;}
+  .btn:hover{border-color:var(--green-border);}
+  .btn.primary{background:var(--green-dim); border-color:var(--green-border); color:var(--green); font-weight:600;}
+  .btn.primary:hover{filter:brightness(1.2);}
+  .btn.danger:hover{border-color:var(--danger); color:var(--danger);}
+  .cat-card .plist{list-style:none; margin-top:10px; border-top:1px solid var(--border); padding-top:8px;}
+  .cat-card .plist li{display:flex; align-items:center; gap:6px; font-size:12.5px; padding:4px 2px; border-radius:7px; cursor:grab; white-space:nowrap;}
+  .cat-card .plist li:active{cursor:grabbing;}
+  .cat-card .plist li.dragging{opacity:.35;}
+  .cat-card .plist li.insert-before{box-shadow:0 -2px 0 0 var(--green);}
+  .cat-card .plist li.insert-after{box-shadow:0 2px 0 0 var(--green);}
+  .cat-card .plist .grip{color:var(--faint); font-size:10px; letter-spacing:-1px; user-select:none; flex-shrink:0;}
+  .cat-card .plist .pnum{color:var(--faint); min-width:18px; text-align:right; font-variant-numeric:tabular-nums; flex-shrink:0;}
+  .cat-card .plist li.seed .pnum{color:var(--green); font-weight:700;}
+  .cat-card .plist .pname{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis;}
+  .cat-card .plist .stag{font-size:9px; letter-spacing:.06em; color:var(--green); background:var(--green-dim); border:1px solid var(--green-border); border-radius:5px; padding:1px 4px; white-space:nowrap; flex-shrink:0;}
+  .cat-card .plist .stag.bye{color:#93c5fd; background:rgba(96,165,250,.1); border-color:rgba(96,165,250,.3);}
+  .cat-card .plist .prm{width:20px; height:20px; border-radius:6px; background:transparent; border:1px solid transparent; color:var(--faint); cursor:pointer; font-size:13px; line-height:1; flex-shrink:0;}
+  .cat-card .plist li:hover .prm{border-color:var(--border);}
+  .cat-card .plist .prm:hover{color:var(--danger); border-color:var(--danger);}
+  .cat-card .plist .pwo{height:20px; border-radius:6px; background:transparent; border:1px solid var(--border); color:var(--muted); cursor:pointer; font-size:9px; padding:0 6px; letter-spacing:.06em; flex-shrink:0; font-family:inherit;}
+  .cat-card .plist .pwo:hover{color:var(--warn); border-color:var(--warn);}
+  .cat-card .plist li.out .pname{text-decoration:line-through; color:var(--faint);}
+  .cat-card .plist .stag.out{color:var(--danger); background:rgba(248,113,113,.1); border-color:rgba(248,113,113,.3);}
+  .cat-card .addp{display:flex; gap:8px; margin-top:10px;}
+  .cat-card .addp input{flex:1; background:var(--card2); border:1px solid var(--border); border-radius:9px; color:var(--txt); padding:7px 10px; font-size:13px; font-family:inherit; min-width:0;}
+  .cat-card .addp input:focus{outline:none; border-color:var(--green-border);}
+  .cat-card .draw-note{font-size:11px; color:var(--warn); margin-top:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-height:15px;}
+  .cat-card .draw-note.ok{color:var(--green);}
+  .add-cat{border:1px dashed var(--border); border-radius:var(--r); flex:0 0 220px; width:220px; display:flex; align-items:center; justify-content:center; color:var(--muted); cursor:pointer; min-height:140px; background:transparent; font-family:inherit; font-size:14px;}
+  .add-cat:hover{border-color:var(--green-border); color:var(--green);}
+
+  /* ---------- Chaves ---------- */
+  .tabs{display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;}
+  .tab{border:1px solid var(--border); background:var(--card); border-radius:999px; padding:7px 16px; cursor:pointer; color:var(--muted); font-size:13px; font-family:inherit;}
+  .tab.active{color:var(--txt); border-color:var(--green-border); background:var(--green-dim);}
+  .bracket-wrap{overflow-x:auto; padding:18px;}
+  .bracket{display:flex; gap:26px; min-height:200px;}
+  .round{display:flex; flex-direction:column; justify-content:space-around; gap:14px; min-width:225px;}
+  .round-title{font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--faint); text-align:center; margin-bottom:2px;}
+  .match{background:var(--card2); border:1px solid var(--border); border-radius:11px; overflow:hidden;}
+  .match.playable{cursor:pointer;}
+  .match.playable:hover{border-color:var(--green-border);}
+  .match .code{font-size:10px; color:var(--faint); padding:4px 10px 0; display:flex; justify-content:space-between;}
+  .match .code .score{color:var(--muted); font-variant-numeric:tabular-nums;}
+  .match .when{font-size:10.5px; color:var(--green); padding:2px 10px 4px; font-variant-numeric:tabular-nums; border-bottom:1px solid var(--border);}
+  .side{display:flex; align-items:center; gap:8px; padding:7px 10px; border-top:1px solid transparent;}
+  .side + .side{border-top:1px solid var(--border);}
+  .side .seed{font-size:10px; color:var(--faint); min-width:14px;}
+  .side .nm{flex:1; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .side .scs{display:flex; gap:5px; font-variant-numeric:tabular-nums; font-size:11.5px; color:var(--muted); flex-shrink:0;}
+  .side .sc{min-width:11px; text-align:center;}
+  .side .sc.w{color:var(--txt); font-weight:700;}
+  .side.winner .sc.w{color:var(--green);}
+  .side .sc.wo{font-size:9px; letter-spacing:.06em; align-self:center;}
+  .side .sc sup{font-size:8px; color:var(--muted); margin-left:1px;}
+  .side.winner .sc.w sup{color:var(--green); opacity:.8;}
+  .sets input.tbin{padding:4px 6px; font-size:12.5px; opacity:.85;}
+  .side.tbd .nm{color:var(--faint); font-style:italic;}
+  .side.winner{background:rgba(74,222,128,.1);}
+  .side.winner .nm{color:var(--green); font-weight:600;}
+  .side.loser .nm{color:var(--faint); text-decoration:line-through;}
+  .bye{color:var(--faint); font-style:italic; font-size:12px;}
+  .bracket-hint{color:var(--faint); font-size:12px; padding:0 18px 14px;}
+
+  /* ---------- Programação ---------- */
+  .sched-head{display:flex; align-items:center; gap:12px; margin-bottom:14px; flex-wrap:wrap;}
+  .legend{display:flex; gap:12px; flex-wrap:wrap; font-size:12px; color:var(--muted);}
+  .legend .dot{width:9px; height:9px; border-radius:50%; display:inline-block; margin-right:5px;}
+  .courts{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px;}
+  .court{background:var(--card); border:1px solid var(--border); border-radius:var(--r); padding:12px; min-height:220px; display:flex; flex-direction:column;}
+  .court.dragover{border-color:var(--green-border); background:#121a14;}
+  .court h4{font-size:13px; color:var(--txt); margin-bottom:2px;}
+  .court .end{font-size:11px; color:var(--muted); margin-bottom:10px;}
+  .court .slots{flex:1; display:flex; flex-direction:column; gap:8px;}
+  .day-group{border:1px solid var(--border); border-radius:12px; background:#0f0f11; padding:8px; display:flex; flex-direction:column; gap:8px;}
+  .day-group.alt{background:#131316;}
+  .day-head{display:flex; justify-content:space-between; align-items:center; gap:8px; background:var(--card2); border:1px solid var(--border); border-radius:8px; padding:7px 10px;}
+  .day-head .dname{font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--txt); font-weight:700;}
+  .day-head .cnt{font-size:11px; color:var(--muted); font-variant-numeric:tabular-nums; text-align:right;}
+  .mcard{background:var(--card2); border:1px solid var(--border); border-left:3px solid var(--faint); border-radius:10px; padding:8px 10px; cursor:grab; position:relative;}
+  .mcard:active{cursor:grabbing;}
+  .mcard.dragging{opacity:.35;}
+  .mcard.insert-before{box-shadow:0 -2px 0 0 var(--green);}
+  .mcard .top{display:flex; justify-content:space-between; align-items:center; font-size:11px; color:var(--muted); margin-bottom:3px;}
+  .mcard .time{font-variant-numeric:tabular-nums; color:var(--txt); font-weight:600;}
+  .mcard .players{font-size:13px;}
+  .mcard .players .tbd{color:var(--faint); font-style:italic;}
+  .mcard .dur{font-size:10.5px; color:var(--faint); margin-top:2px;}
+  .mcard.done{opacity:.6; border-left-color:var(--green);}
+  .mcard.done .players{text-decoration:line-through;}
+  .mcard .resbtn{position:absolute; top:6px; right:8px; display:none;}
+  .gapcard{border:1.5px dashed var(--border); border-radius:10px; padding:9px 10px; display:flex; justify-content:space-between; align-items:center; font-size:11.5px; color:var(--muted); background:rgba(255,255,255,.015);}
+  .gapcard.hot{border-color:var(--green-border); color:var(--green);}
+  .gapcard button{width:22px; height:22px; border-radius:7px; background:var(--card2); border:1px solid var(--border); color:var(--muted); cursor:pointer; font-size:13px; line-height:1;}
+  .gapcard button:hover{border-color:var(--danger); color:var(--danger);}
+  .badge{display:inline-block; font-size:10px; border-radius:6px; padding:1px 6px; margin-top:5px; margin-right:4px;}
+  .badge.dep{background:rgba(248,113,113,.12); color:var(--danger); border:1px solid rgba(248,113,113,.3);}
+  .badge.rest{background:rgba(251,191,36,.1); color:var(--warn); border:1px solid rgba(251,191,36,.3);}
+  .badge.over{background:rgba(248,113,113,.12); color:var(--danger); border:1px solid rgba(248,113,113,.3);}
+  .badge.ok{background:var(--green-dim); color:var(--green); border:1px solid var(--green-border);}
+  .empty-court{color:var(--faint); font-size:12px; text-align:center; padding:20px 0; border:1px dashed var(--border); border-radius:10px;}
+
+  /* ---------- Grade de horários ---------- */
+  .sched-days{display:flex; flex-direction:column; gap:16px;}
+  .sday{background:var(--card); border:1px solid var(--border); border-radius:var(--r); overflow:hidden;}
+  .sday-head{display:flex; justify-content:space-between; align-items:center; gap:10px; padding:10px 14px; background:var(--card2); border-bottom:1px solid var(--border);}
+  .sday-head .dname{font-size:12px; letter-spacing:.12em; text-transform:uppercase; font-weight:700;}
+  .sday-head .cnt{font-size:11.5px; color:var(--muted); font-variant-numeric:tabular-nums;}
+  .sday-scroll{overflow-x:auto;}
+  .sgrid{display:grid;}
+  .sgrid .corner{border-bottom:1px solid var(--border);}
+  .sgrid .chead{padding:8px 10px; font-size:12.5px; font-weight:600; border-bottom:1px solid var(--border); border-left:1px solid var(--border); white-space:nowrap;}
+  .sgrid .chead .end{color:var(--muted); font-weight:400; font-size:10.5px;}
+  .truler{position:relative; font-size:10px; color:var(--faint); font-variant-numeric:tabular-nums;}
+  .truler span{position:absolute; right:8px;}
+  .tcanvas{position:relative; border-left:1px solid var(--border); background-image:linear-gradient(to bottom, rgba(255,255,255,.05) 1px, transparent 1px);}
+  .tcanvas.dragover{background-color:#121a14;}
+  .tcard{position:absolute; left:5px; right:5px; padding:4px 8px; overflow:hidden;}
+  .tcard .t{display:flex; justify-content:space-between; font-size:10.5px; color:var(--muted); font-variant-numeric:tabular-nums;}
+  .tcard .t .ok{color:var(--green);}
+  .tcard .p{font-size:12px; line-height:1.3; margin-top:1px;}
+  .tcard .p .tbd{color:var(--faint); font-style:italic;}
+  .tcard .c{font-size:10px; color:var(--muted); margin-top:1px; display:flex; align-items:center; gap:5px;}
+  .tcard .c .dot{width:7px; height:7px; border-radius:50%; display:inline-block;}
+  .tcard.done .p{text-decoration:line-through;}
+  .tcard.live{border-color:var(--green-border); box-shadow:0 0 0 1px var(--green-border), 0 0 12px rgba(74,222,128,.15);}
+  .tcard.live .t span:first-child{color:var(--green); font-weight:700;}
+  .tcard.late{border-color:var(--danger); box-shadow:0 0 0 1px var(--danger), 0 0 12px rgba(248,113,113,.2);}
+  .tcard.late .t span:first-child{color:var(--danger); font-weight:700;}
+  .tcard.late .ldot{display:inline-block; background:var(--danger);}
+  .tcard .ldot{display:none; width:7px; height:7px; border-radius:50%; background:var(--green); animation:lpulse 1.4s ease-in-out infinite;}
+  .tcard.live .ldot{display:inline-block;}
+  @keyframes lpulse{0%,100%{opacity:1;} 50%{opacity:.25;}}
+  .tcard .wb{display:flex; flex-wrap:wrap; gap:3px; margin-top:2px;}
+  .tcard .wb .badge{margin:0; font-size:9px; padding:0 4px;}
+  .tgap{position:absolute; left:5px; right:5px; padding:5px 8px; font-size:10.5px; overflow:hidden; display:flex; align-items:flex-start; background:rgba(255,255,255,.055);}
+  .tgap.imp{opacity:.75; border-style:dotted; background:rgba(255,255,255,.035);}
+  .tgap.hot{background:rgba(74,222,128,.08);}
+  .nowline{position:absolute; left:0; right:0; border-top:2px solid var(--green); z-index:5; pointer-events:none;}
+  .nowline.off{opacity:.4; border-top-style:dashed;}
+  .nowline::before{content:''; position:absolute; left:0; top:-4px; width:7px; height:7px; border-radius:50%; background:var(--green);}
+  .nowtag{position:absolute; right:4px; background:var(--green); color:#08130b; font-size:9px; font-weight:700; padding:1px 4px; border-radius:4px; z-index:5;}
+  .sgrid .chead .cdot{width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:6px; vertical-align:baseline;}
+
+  /* ---------- Telão (Modo TV) ---------- */
+  #tvOverlay{position:fixed; inset:0; background:var(--bg); z-index:90; display:none; overflow:auto; padding:20px 28px;}
+  #tvOverlay.open{display:block;}
+  .tv-head{display:flex; align-items:center; gap:14px; margin-bottom:16px;}
+  .tv-head h1{font-size:22px; font-weight:700;}
+  .tv-sub{color:var(--muted); font-size:13px;}
+  .tv-clock{margin-left:auto; font-size:30px; font-weight:800; font-variant-numeric:tabular-nums; color:var(--green);}
+  .tv-close{width:38px; height:38px; border-radius:10px; background:var(--card2); border:1px solid var(--border); color:var(--muted); font-size:20px; cursor:pointer; margin-left:14px;}
+  .tv-close:hover{border-color:var(--danger); color:var(--danger);}
+  #tvBodyL{pointer-events:none;}
+
+  /* ---------- Visão do evento ---------- */
+  .overview{display:grid; grid-template-columns:1fr; gap:14px; max-width:860px;}
+  .ov-card{padding:16px 18px;}
+  .ov-title{font-size:13px; font-weight:600; margin-bottom:10px;}
+  .day-sum{display:grid; grid-template-columns:minmax(90px,1fr) auto auto; gap:4px 14px; padding:11px 0; border-top:1px solid var(--border); align-items:baseline;}
+  .day-sum:first-of-type{border-top:none;}
+  .day-sum .dname{font-size:11px; letter-spacing:.1em; text-transform:uppercase; font-weight:700;}
+  .day-sum .range{font-size:16px; font-weight:700; font-variant-numeric:tabular-nums; white-space:nowrap;}
+  .day-sum .range .arrow{color:var(--faint); font-weight:400;}
+  .day-sum .cnt{font-size:12px; color:var(--muted); white-space:nowrap;}
+  .day-sum .courts-min{grid-column:1/-1; font-size:11px; color:var(--faint); font-variant-numeric:tabular-nums;}
+  .pp-empty{color:var(--faint); font-size:12.5px; line-height:1.5;}
+  .pp-item{display:flex; gap:12px; padding:9px 0; border-top:1px solid var(--border); font-size:13px; align-items:flex-start;}
+  .pp-item:first-of-type{border-top:none;}
+  .pp-when{min-width:118px; color:var(--txt); font-weight:600; font-size:12px; font-variant-numeric:tabular-nums;}
+  .pp-item.if .pp-when, .pp-item.if div{color:var(--muted);}
+  .badge.next{background:var(--green-dim); color:var(--green); border:1px solid var(--green-border);}
+  .badge.if{background:rgba(96,165,250,.1); color:#93c5fd; border:1px solid rgba(96,165,250,.3);}
+
+  /* ---------- Modais ---------- */
+  .overlay{position:fixed; inset:0; background:rgba(0,0,0,.65); display:none; align-items:flex-start; justify-content:center; z-index:100; padding:40px 16px; overflow-y:auto;}
+  .overlay.open{display:flex;}
+  .modal{background:var(--card); border:1px solid var(--border); border-radius:16px; width:100%; max-width:460px; padding:22px;}
+  .modal h3{font-size:16px; margin-bottom:4px;}
+  .modal .msub{color:var(--muted); font-size:12px; margin-bottom:16px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block; font-size:12px; color:var(--muted); margin-bottom:5px;}
+  .field textarea{min-height:150px; resize:vertical; line-height:1.6;}
+  .modal .foot{display:flex; justify-content:flex-end; gap:8px; margin-top:6px; flex-wrap:wrap;}
+  .wsel{display:flex; flex-direction:column; gap:8px; margin-bottom:16px;}
+  .wopt{display:flex; align-items:center; gap:10px; background:var(--card2); border:1px solid var(--border); border-radius:10px; padding:10px 12px; cursor:pointer;}
+  .wopt:hover{border-color:var(--green-border);}
+  .wopt.sel{border-color:var(--green-border); background:var(--green-dim);}
+  .wopt.sel .nm{color:var(--green); font-weight:600;}
+  .wopt .tag{font-size:10px; color:var(--faint); letter-spacing:.08em;}
+  .sets{display:grid; grid-template-columns:70px 1fr 16px 1fr; gap:8px 10px; align-items:center; margin-bottom:14px;}
+  .sets .slabel{font-size:11px; color:var(--muted);}
+  .sets input{background:var(--card2); border:1px solid var(--border); border-radius:8px; color:var(--txt); padding:7px 8px; font-size:15px; text-align:center; width:100%; font-family:inherit;}
+  .sets input:focus{outline:none; border-color:var(--green-border);}
+  .sets .x{color:var(--faint); text-align:center;}
+  .toast{position:fixed; bottom:22px; left:50%; transform:translateX(-50%); background:var(--card2); border:1px solid var(--green-border); color:var(--txt); padding:10px 18px; border-radius:12px; font-size:13px; z-index:200; display:none;}
+
+  @media (max-width:640px){ main{padding:14px;} header{padding:12px 14px;} }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <header>
+    <div class="logo">🎾</div>
+    <div>
+      <h1>Tennis T11 · Torneios</h1>
+      <div class="sub">Chaves, tempos e programação de quadras</div>
+    </div>
+    <div class="spacer"></div>
+    <div class="pill" id="summaryPill">—</div>
+  </header>
+  <nav class="viewnav" id="viewNav">
+    <button class="active" data-view="view-config" onclick="showView('view-config')">Configurações</button>
+    <button data-view="view-cats" onclick="showView('view-cats')">Categorias</button>
+    <button data-view="view-bracket" onclick="showView('view-bracket')">Chaves</button>
+    <button data-view="view-sched" onclick="showView('view-sched')">Programação</button>
+    <button data-view="view-overview" onclick="showView('view-overview')">Visão do evento</button>
+  </nav>
+</div>
+
+<main>
+
+  <!-- CONFIGURAÇÕES -->
+  <section class="view active" id="view-config">
+    <div class="eyebrow">Configurações do evento</div>
+    <div class="card" id="configCard">
+      <div class="cfg-sec cfg">
+        <div class="cfg-title">Quadras</div>
+        <div class="cfg-sub">Quantidade e nomes — os nomes aparecem na grade, na previsão e nas notificações.</div>
+        <div class="cfg-row" style="margin-bottom:14px;">
+          <div>
+            <label>Quadras</label>
+            <div class="courts-stepper">
+              <button onclick="changeCourts(-1)">−</button>
+              <div class="val" id="courtsVal">3</div>
+              <button onclick="changeCourts(1)">+</button>
+            </div>
+            <div class="hint">T11 tem 3</div>
+          </div>
+        </div>
+        <div class="cfg-row" id="courtNames"></div>
+      </div>
+      <div class="cfg-sec cfg">
+        <div class="cfg-title">Tempos</div>
+        <div class="cfg-sub">Base do cálculo de duração: games do formato × min/game + aquecimento + troca.</div>
+        <div class="cfg-row">
+          <div>
+            <label>Tempo por game</label>
+            <input type="text" inputmode="numeric" id="cfgMinGame" value="4:30" placeholder="min:seg" onchange="onCfgChange()">
+            <div class="hint">amador: 4:00 a 5:00</div>
+          </div>
+          <div>
+            <label>Aquecimento</label>
+            <input type="text" inputmode="numeric" id="cfgWarmup" value="5:00" placeholder="min:seg" onchange="onCfgChange()">
+          </div>
+          <div>
+            <label>Troca entre jogos</label>
+            <input type="text" inputmode="numeric" id="cfgBuffer" value="5:00" placeholder="min:seg" onchange="onCfgChange()">
+          </div>
+          <div>
+            <label>Descanso mínimo</label>
+            <input type="text" inputmode="numeric" id="cfgRest" value="45:00" placeholder="min:seg" onchange="onCfgChange()">
+            <div class="hint">do tenista; gera alerta</div>
+          </div>
+        </div>
+      </div>
+      <div class="cfg-sec cfg">
+        <div class="cfg-title">Dias e janelas de jogo</div>
+        <div class="cfg-sub">A agenda preenche na ordem — quando um dia lota, os jogos passam para o seguinte.</div>
+        <div class="sessions-wrap">
+          <div class="session-cap"><span>Data</span><span>Rótulo (opcional)</span><span>Início</span><span>Fim</span><span></span></div>
+          <div id="sessionsList"></div>
+          <button class="btn" onclick="addSession()">+ Adicionar dia</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CATEGORIAS -->
+  <section class="view" id="view-cats">
+    <div class="eyebrow">Categorias em disputa</div>
+    <div class="cat-row" id="catRow"></div>
+  </section>
+
+  <!-- CHAVES -->
+  <section class="view" id="view-bracket">
+    <div class="eyebrow">Chaves</div>
+    <div class="sched-head">
+      <div class="tabs" id="catTabs" style="margin-bottom:0;"></div>
+      <div class="spacer" style="flex:1"></div>
+      <button class="btn" onclick="openTV('bracket')">📺 Modo TV</button>
+    </div>
+    <div class="card">
+      <div class="bracket-wrap"><div class="bracket" id="bracket"></div></div>
+      <div class="bracket-hint">Clique em um jogo (na chave ou no card da programação) para lançar o resultado. O vencedor avança automaticamente; byes avançam sozinhos. Desistências são marcadas pelo botão W.O. no card da categoria e decidem os jogos pendentes em cascata.</div>
+    </div>
+  </section>
+
+  <!-- VISÃO DO EVENTO -->
+  <section class="view" id="view-overview">
+    <div class="eyebrow">Visão do evento</div>
+    <div class="overview">
+      <div class="card ov-card" id="daySummary"></div>
+      <div class="card ov-card">
+        <div class="ov-title">Percurso do tenista</div>
+        <select id="pathSel" onchange="renderPlayerPath()" style="width:100%; background:var(--card2); border:1px solid var(--border); border-radius:9px; color:var(--txt); padding:8px 10px; font-size:14px; font-family:inherit; margin-bottom:12px;"></select>
+        <div id="playerPath"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROGRAMAÇÃO -->
+  <section class="view" id="view-sched">
+    <div class="eyebrow">Programação das quadras</div>
+    <div class="sched-head">
+      <div class="legend" id="legend"></div>
+      <div class="spacer" style="flex:1"></div>
+      <button class="btn" onclick="openTV('sched')">📺 Modo TV</button>
+      <button class="btn" onclick="rebuildSchedule(); toast('Ordem dos jogos redistribuída')">Redistribuir ordem padrão</button>
+      <button class="btn primary" id="pubBtn" onclick="openPublish()">Publicar alterações</button>
+    </div>
+    <div id="courts"></div>
+    <p style="color:var(--faint); font-size:12px; margin-top:10px;">
+      Arraste os jogos na grade para antecipar, postergar ou trocar de quadra — os horários recalculam em fila.
+      Soltar sobre um jogo insere antes/depois; sobre uma janela livre, ocupa o espaço; no vazio do dia, entra no fim daquele dia.
+      <span style="color:var(--danger)">Vermelho</span>: jogo antes dos que o alimentam, ou que não cabe nos dias.
+      <span style="color:var(--warn)">Amarelo</span>: descanso mínimo violado.
+    </p>
+  </section>
+
+</main>
+
+<!-- MODAL NOVA CATEGORIA -->
+<div class="overlay" id="modal">
+  <div class="modal">
+    <h3 id="modalTitle">Nova categoria</h3>
+    <div class="msub">A lista deve estar em ordem de ranking — ela define os cabeças de chave.</div>
+    <div class="field">
+      <label>Nome da categoria</label>
+      <input id="mName" placeholder="Ex.: Categoria A, Feminino, 45+">
+    </div>
+    <div class="field">
+      <label>Formato dos jogos</label>
+      <select id="mFormat"></select>
+    </div>
+    <div class="field">
+      <label>Jogadores em ordem de ranking (um por linha, 1º = melhor)</label>
+      <textarea id="mPlayers" placeholder="Ricardo Alexandre&#10;João Souza&#10;Pedro Lima&#10;..."></textarea>
+    </div>
+    <div class="foot">
+      <button class="btn" onclick="closeModal()">Cancelar</button>
+      <button class="btn primary" onclick="saveCategory()">Sortear chave</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL RESULTADO -->
+<div class="overlay" id="resModal">
+  <div class="modal">
+    <h3 id="resTitle">Resultado</h3>
+    <div class="msub" id="resSub"></div>
+    <div class="wsel">
+      <div class="wopt" id="wopt1" onclick="pickWinner(1)"><span class="tag">VENCEDOR</span><span class="nm" id="wname1"></span></div>
+      <div class="wopt" id="wopt2" onclick="pickWinner(2)"><span class="tag">VENCEDOR</span><span class="nm" id="wname2"></span></div>
+    </div>
+    <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:8px;">Placar (opcional — se preenchido, o vencedor é detectado pelos sets)</label>
+    <div class="sets" id="setsGrid"></div>
+    <div class="field">
+      <label>Término real do jogo (opcional — os jogos seguintes da quadra recalculam a partir dele)</label>
+      <input type="time" id="resEnd">
+    </div>
+    <div class="foot">
+      <button class="btn danger" id="resClear" onclick="clearResult()">Remover resultado</button>
+      <span style="flex:1"></span>
+      <button class="btn" onclick="closeRes()">Cancelar</button>
+      <button class="btn primary" onclick="saveResult()">Salvar resultado</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PUBLICAÇÃO -->
+<div class="overlay" id="pubModal">
+  <div class="modal" style="max-width:560px;">
+    <h3>Publicar alterações</h3>
+    <div class="msub">Prévia das notificações (push / WhatsApp) que serão enviadas aos jogadores afetados. Nada é enviado até confirmar.</div>
+    <div id="pubList" style="max-height:50vh; overflow-y:auto;"></div>
+    <div class="foot">
+      <button class="btn" onclick="closePub()">Cancelar</button>
+      <button class="btn primary" id="pubConfirm" onclick="confirmPublish()">Confirmar e enviar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL INCLUSÃO EM CHAVE SORTEADA -->
+<div class="overlay" id="incModal">
+  <div class="modal">
+    <h3 id="incTitle">Incluir jogador</h3>
+    <div class="msub" id="incSub"></div>
+    <div class="wsel" id="incList"></div>
+    <div class="foot">
+      <button class="btn" onclick="closeInc()">Cancelar</button>
+      <button class="btn primary" onclick="confirmInclude()">Incluir</button>
+    </div>
+  </div>
+</div>
+
+<!-- TELÃO EM TELA CHEIA (fallback do Modo TV) -->
+<div id="tvOverlay">
+  <div class="tv-head">
+    <div class="logo">🎾</div>
+    <div><h1 id="tvTitleL"></h1><div class="tv-sub" id="tvSubL"></div></div>
+    <div class="tv-clock" id="tvClockL"></div>
+    <button class="tv-close" onclick="closeTV()" title="Fechar telão">×</button>
+  </div>
+  <div id="tvBodyL"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= FORMATOS ================= */
+const FORMATS = {
+  best3:  {label:'Melhor de 3 sets (6 games)', games:20, setLabels:['1º set','2º set','3º set'], tb:[7,7,7]},
+  short3: {label:'Melhor de 3 sets curtos (4 games)', games:13, setLabels:['1º set','2º set','3º set'], tb:[4,4,4]},
+  proset8:{label:'Pro-set de 8 games', games:13, setLabels:['Pro-set'], tb:[8]},
+  proset9:{label:'Pro-set de 9 games', games:15, setLabels:['Pro-set'], tb:[9]},
+  mtb:    {label:'2 sets + match tie-break', games:18, setLabels:['1º set','2º set','Match TB'], tb:[7,7,null]},
+};
+const CAT_COLORS = ['var(--catA)','var(--catB)','var(--catC)','var(--catD)','var(--catE)'];
+const COURT_COLORS = ['#60a5fa','#fb923c','#a78bfa','#f472b6','#22d3ee','#facc15','#f87171','#94a3b8'];
+const PXM = 1.1; // pixels por minuto na grade
+function courtName(ci){ return (state.config.courtNames[ci]||'').trim() || ('Quadra '+(ci+1)); }
+function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+
+/* ================= ESTADO ================= */
+const state = {
+  config:{
+    courts:3, minGame:4.5, warmup:5, buffer:5, rest:45,
+    courtNames:[],
+    sessions:[
+      {date:'2026-07-31', label:'noite', start:'19:00', end:'23:00'},
+      {date:'2026-08-01', label:'',      start:'08:00', end:'18:00'},
+      {date:'2026-08-02', label:'',      start:'08:00', end:'18:00'},
+    ],
+  },
+  cats:[], schedule:[], activeCat:null, published:null,
+};
+let nextCatId = 1;
+
+/* ================= UTIL ================= */
+const $ = id => document.getElementById(id);
+function showView(id){
+  document.querySelectorAll('main > section.view').forEach(s=>s.classList.toggle('active', s.id===id));
+  document.querySelectorAll('#viewNav button').forEach(b=>b.classList.toggle('active', b.dataset.view===id));
+  window.scrollTo({top:0});
+  if(typeof updateNow==='function') updateNow();
+}
+function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+function toMin(t){ const [h,m]=(t||'08:00').split(':').map(Number); return h*60+m; }
+function fmtT(min){ const h=Math.floor(min/60)%24, m=Math.round(min%60); return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0'); }
+const DOW=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+function sessLabel(s){
+  if(s.date){
+    const d=new Date(s.date+'T12:00:00');
+    const base=DOW[d.getDay()]+' '+String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0');
+    return s.label? base+' · '+s.label : base;
+  }
+  return s.label||'Dia';
+}
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.style.display='block'; clearTimeout(t._h); t._h=setTimeout(()=>t.style.display='none',2600); }
+
+/* ================= SORTEIO ATP ================= */
+function seedOrder(n){
+  let r=[1];
+  while(r.length<n){ const m=r.length*2+1; const nx=[]; r.forEach(s=>{nx.push(s); nx.push(m-s);}); r=nx; }
+  return r;
+}
+function buildDraw(players){
+  const N = players.length;
+  let D = 2; while(D < N) D *= 2;
+  const numSeeds = Math.max(2, Math.min(D/4, N));
+  const order = seedOrder(D);
+  const posOfSeed = {}; order.forEach((s,i)=>posOfSeed[s]=i);
+  const half = D/2;
+  const remap = i => i < half ? i : (D-1-(i-half));
+  const slots = new Array(D).fill(null);
+  const bands = [[1],[2]];
+  let b=3; while(b<=numSeeds){ const band=[]; for(let s=b;s<Math.min(b*2,numSeeds+1);s++)band.push(s); if(band.length)bands.push(band); b*=2; }
+  bands.forEach(band=>{
+    const positions = band.map(s=>remap(posOfSeed[s]));
+    const seedsShuffled = shuffle([...band]);
+    shuffle(positions);
+    band.forEach((_,i)=>{ slots[positions[i]] = {type:'player', idx:seedsShuffled[i]-1, seed:seedsShuffled[i]}; });
+  });
+  const numByes = D - N;
+  const seedSlotsInOrder = [];
+  for(let s=1;s<=numSeeds;s++) seedSlotsInOrder.push(remap(posOfSeed[s]));
+  const opponent = p => (p%2===0) ? p+1 : p-1;
+  let byesLeft = numByes;
+  for(const sp of seedSlotsInOrder){ if(byesLeft<=0)break; const op=opponent(sp); if(slots[op]===null){ slots[op]={type:'bye'}; byesLeft--; } }
+  const emptyIdx = ()=>slots.map((v,i)=>v===null?i:-1).filter(i=>i>=0);
+  while(byesLeft>0){ const e=shuffle(emptyIdx()); slots[e[0]]={type:'bye'}; byesLeft--; }
+  const unseeded = []; for(let i=numSeeds;i<N;i++) unseeded.push(i);
+  shuffle(unseeded);
+  emptyIdx().forEach((pos,i)=>{ slots[pos]={type:'player', idx:unseeded[i], seed:null}; });
+  return {D, slots};
+}
+function roundName(c){ return c===1?'Final':c===2?'Semifinais':c===4?'Quartas de final':c===8?'Oitavas de final':'Rodada de '+c*2; }
+function roundShort(c,i){ const p=c===1?'F':c===2?'SF':c===4?'QF':c===8?'OF':'R'+c*2+'-'; return c===1?'F':p+(i+1); }
+function createMatches(cat){
+  cat.drawPlayers = cat.players.slice(); // snapshot do ranking no momento do sorteio
+  cat.wo = {};                           // novo sorteio zera desistências
+  const {D, slots} = buildDraw(cat.drawPlayers);
+  cat.drawSize = D;
+  cat.rounds = Math.log2(D);
+  const matches = []; let id=0;
+  const r0 = D/2;
+  for(let i=0;i<r0;i++) matches.push({id:id++, round:0, idx:i, code:cat.tag+'-'+roundShort(r0,i), p1:slots[i*2], p2:slots[i*2+1], winner:null, score:null, auto:false});
+  for(let r=1;r<cat.rounds;r++){
+    const count = D/Math.pow(2,r+1);
+    const prevStart = matches.length - D/Math.pow(2,r);
+    for(let i=0;i<count;i++){
+      const f1=matches[prevStart+i*2], f2=matches[prevStart+i*2+1];
+      matches.push({id:id++, round:r, idx:i, code:cat.tag+'-'+roundShort(count,i), p1:{type:'winner',ref:f1.id}, p2:{type:'winner',ref:f2.id}, winner:null, score:null, auto:false});
+    }
+  }
+  matches.forEach(m=>{
+    if(m.round===0){
+      if(m.p1.type==='bye' && m.p2.type==='player'){ m.winner=2; m.auto=true; }
+      if(m.p2.type==='bye' && m.p1.type==='player'){ m.winner=1; m.auto=true; }
+    }
+  });
+  cat.matches = matches;
+}
+function resolveSide(cat, side){
+  if(side.type==='player') return {name:(cat.drawPlayers||cat.players)[side.idx], seed:side.seed, known:true};
+  if(side.type==='bye') return {name:'Bye', seed:null, known:false, bye:true};
+  const ref = cat.matches[side.ref];
+  if(ref.winner) return resolveSide(cat, ref.winner===1?ref.p1:ref.p2);
+  return {name:'Venc. '+ref.code, seed:null, known:false};
+}
+
+/* ============ DESISTÊNCIA (W.O.) E VAGAS NA CHAVE ============ */
+function nextMatch(cat,m){ return cat.matches.find(x=>(x.p1.type==='winner'&&x.p1.ref===m.id)||(x.p2.type==='winner'&&x.p2.ref===m.id)); }
+function isWO(cat,name){ return Object.keys(cat.wo||{}).some(i=>cat.drawPlayers[i]===name); }
+// troca a posição de um jogo na programação por uma janela livre (filosofia não-destrutiva)
+function keyToGap(key){
+  state.schedule.forEach(c=>{
+    const i=c.indexOf(key);
+    if(i<0)return;
+    c.splice(i,1);
+    const f=findByKey(key);
+    if(f && i<c.length) c.splice(i,0,'gap:'+(gid++)+':'+matchDuration(f.cat));
+  });
+}
+function reAddToSchedule(cat,m){
+  const key=matchKey(cat,m);
+  if(state.schedule.some(c=>c.includes(key))) return;
+  let best=0; state.schedule.forEach((c,i)=>{ if(c.length<state.schedule[best].length) best=i; });
+  state.schedule[best].push(key);
+}
+// decide por W.O. todo jogo pendente em que um dos lados conhecidos é desistente (com cascata)
+function applyWO(cat){
+  if(!cat.matches || !cat.wo || !Object.keys(cat.wo).length) return;
+  let changed=true;
+  while(changed){
+    changed=false;
+    cat.matches.forEach(m=>{
+      if(m.winner || m.auto) return;
+      const r1=resolveSide(cat,m.p1), r2=resolveSide(cat,m.p2);
+      if(!r1.known || !r2.known) return;
+      const w1=isWO(cat,r1.name), w2=isWO(cat,r2.name);
+      if(!w1 && !w2) return;
+      m.winner = w1? 2 : 1;   // se ambos desistiram, avança o lado 1 (caso raríssimo)
+      m.woAuto = true; m.score=null;
+      keyToGap(matchKey(cat,m));
+      changed=true;
+    });
+  }
+}
+function withdrawPlayer(catId, idx){
+  const cat=state.cats.find(c=>c.id===catId); if(!cat)return;
+  cat.wo=cat.wo||{}; cat.wo[idx]=true;
+  applyWO(cat);
+  render();
+  toast(cat.drawPlayers[idx]+' desistiu — jogos pendentes decididos por W.O.');
+}
+function hasRealDownstream(cat,m){
+  const nx=nextMatch(cat,m);
+  if(!nx) return false;
+  if(nx.winner && !nx.woAuto && !nx.auto) return true;
+  return hasRealDownstream(cat,nx);
+}
+function unWithdrawPlayer(catId, idx){
+  const cat=state.cats.find(c=>c.id===catId); if(!cat||!cat.wo||!cat.wo[idx])return;
+  const name=cat.drawPlayers[idx];
+  const woMs=cat.matches.filter(m=>m.woAuto && (resolveSide(cat,m.p1).name===name || resolveSide(cat,m.p2).name===name));
+  if(woMs.some(m=>hasRealDownstream(cat,m))){ toast('Não dá para desfazer: já há resultado real dependendo deste W.O.'); return; }
+  delete cat.wo[idx];
+  woMs.sort((a,b)=>a.round-b.round).forEach(m=>{
+    m.winner=null; m.woAuto=false;
+    clearDownstream(cat,m.id);
+    reAddToSchedule(cat,m);
+  });
+  applyWO(cat); // outros desistentes continuam valendo
+  render();
+  toast('Desistência desfeita: '+name+' — jogos devolvidos à programação');
+}
+// vagas abertas na chave: byes da 1ª rodada (se a rodada seguinte não jogou) e desistentes que não jogaram
+function drawVacancies(cat){
+  const v=[];
+  cat.matches.filter(m=>m.round===0).forEach(m=>{
+    const nx=nextMatch(cat,m);
+    const blocked = nx && nx.winner && !nx.woAuto;
+    [['p1','p2'],['p2','p1']].forEach(([a,b])=>{
+      if(m[a].type==='bye' && m[b].type==='player' && !blocked)
+        v.push({type:'bye', mId:m.id, side:a, label:'Vaga de bye em '+m.code+' — enfrentaria '+cat.drawPlayers[m[b].idx]});
+    });
+  });
+  Object.keys(cat.wo||{}).forEach(i=>{
+    i=+i;
+    const played=cat.matches.some(m=>m.winner && !m.woAuto && !m.auto &&
+      ((m.p1.type==='player'&&m.p1.idx===i)||(m.p2.type==='player'&&m.p2.idx===i)));
+    if(!played) v.push({type:'sub', idx:i, label:'Assumir o lugar de '+cat.drawPlayers[i]+' (desistente que não jogou)'});
+  });
+  return v;
+}
+function applyByeFill(cat, mId, name){
+  const m=cat.matches[mId];
+  const side = m.p1.type==='bye' ? 'p1' : 'p2';
+  const newIdx=cat.drawPlayers.push(name)-1;
+  m[side]={type:'player', idx:newIdx, seed:null};
+  m.auto=false; m.winner=null; m.score=null; m.woAuto=false;
+  clearDownstream(cat,m.id);
+  cat.players.push(name);
+  reAddToSchedule(cat,m);
+  applyWO(cat);
+}
+function applySub(cat, idx, name){
+  const old=cat.drawPlayers[idx];
+  // reverte os W.O. automáticos que envolviam o substituído (por rodada, do início ao fim)
+  cat.matches.filter(m=>m.woAuto && (resolveSide(cat,m.p1).name===old || resolveSide(cat,m.p2).name===old))
+    .sort((a,b)=>a.round-b.round)
+    .forEach(m=>{ m.winner=null; m.woAuto=false; clearDownstream(cat,m.id); reAddToSchedule(cat,m); });
+  delete cat.wo[idx];
+  cat.drawPlayers[idx]=name;
+  const pi=cat.players.indexOf(old);
+  if(pi>=0) cat.players[pi]=name; else cat.players.push(name);
+  applyWO(cat);
+}
+
+/* ================= PROGRAMAÇÃO ================= */
+function matchKey(cat,m){ return cat.id+':'+m.id; }
+function findByKey(key){
+  const [cid,mid]=key.split(':').map(Number);
+  const cat = state.cats.find(c=>c.id===cid);
+  return cat? {cat, m:cat.matches[mid]} : null;
+}
+function matchDuration(cat){
+  return Math.round(FORMATS[cat.format].games*state.config.minGame + state.config.warmup + state.config.buffer);
+}
+function rebuildSchedule(){
+  const order=[];
+  const maxR = Math.max(0,...state.cats.map(c=>c.rounds||0));
+  for(let r=0;r<maxR;r++) state.cats.forEach(cat=>{
+    (cat.matches||[]).filter(m=>m.round===r && !m.auto && !m.woAuto).forEach(m=>order.push(matchKey(cat,m)));
+  });
+  const n = state.config.courts;
+  state.schedule = Array.from({length:n},()=>[]);
+  order.forEach((k,i)=>state.schedule[i%n].push(k));
+  render();
+}
+function scheduleAfterCourtChange(){
+  const times = computeTimes();
+  const flat = state.schedule.flat().filter(k=>!isGap(k)).map(k=>({k, s:times[k]?times[k].abs:1e12}));
+  flat.sort((a,b)=>a.s-b.s);
+  const n = state.config.courts;
+  state.schedule = Array.from({length:n},()=>[]);
+  flat.forEach((o,i)=>state.schedule[i%n].push(o.k));
+}
+// preenche cada quadra dia a dia: lotou a janela, o próximo jogo vai para o dia seguinte
+function computeTimes(){
+  const S = state.config.sessions.length ? state.config.sessions.map(s=>({label:sessLabel(s), start:toMin(s.start), end:toMin(s.end), date:s.date||''}))
+                                         : [{label:'Dia 1', start:480, end:1080, date:''}];
+  const today=todayStr();
+  const nowD=new Date();
+  const nowMin=nowD.getHours()*60+nowD.getMinutes();
+  const times={};
+  state.schedule.forEach(court=>{
+    let si=0, cur=S[0].start;
+    court.forEach(k=>{
+      if(isGap(k)){
+        let end=cur+gapDur(k);
+        if(end>S[si].end) end=S[si].end;           // janela livre não vira madrugada
+        times[k]={si, day:S[si].label, start:cur, end, dur:Math.max(0,Math.round(end-cur)), gap:true, abs:si*1440+cur, absEnd:si*1440+end};
+        cur=end;
+        if(cur>=S[si].end && si<S.length-1){ si++; cur=S[si].start; }
+        return;
+      }
+      const f=findByKey(k); if(!f)return;
+      const d=matchDuration(f.cat);
+      while(si<S.length-1 && cur+d > S[si].end){ si++; cur=S[si].start; }
+      const overflow = cur+d > S[si].end;
+      let end = cur+d, actual=false, late=false, lateMin=0;
+      if(f.m.actualEnd!=null){ end=f.m.actualEnd; actual=true; }
+      else if(!f.m.winner && S[si].date===today && cur<=nowMin && nowMin>end){
+        // jogo em andamento que estourou o previsto: estende até agora e empurra os próximos
+        late=true; lateMin=Math.round(nowMin-end); end=nowMin;
+      }
+      times[k]={si, day:S[si].label, start:cur, end, dur:d, abs:si*1440+cur, absEnd:si*1440+end, overflow, actual, late, lateMin};
+      cur=end;
+    });
+  });
+  return times;
+}
+function computeWarnings(times){
+  const warn={};
+  const add=(k,w)=>{ (warn[k]=warn[k]||[]).push(w); };
+  state.schedule.flat().forEach(k=>{
+    const f=findByKey(k); if(!f)return;
+    if(times[k] && times[k].overflow) add(k,{type:'over', msg:'Não cabe nos dias configurados'});
+    ['p1','p2'].forEach(s=>{
+      const side=f.m[s];
+      if(side.type==='winner'){
+        const ref=f.cat.matches[side.ref];
+        if(ref.auto || ref.winner) return;
+        const rk=matchKey(f.cat,ref);
+        if(times[rk] && times[k] && times[rk].absEnd > times[k].abs)
+          add(k,{type:'dep', msg:'⚠ Antes de '+ref.code});
+      }
+    });
+  });
+  const byPlayer={};
+  state.schedule.flat().forEach(k=>{
+    const f=findByKey(k); if(!f || !times[k])return;
+    ['p1','p2'].forEach(s=>{
+      const r=resolveSide(f.cat,f.m[s]);
+      if(r.known) (byPlayer[r.name]=byPlayer[r.name]||[]).push({k, ...times[k]});
+    });
+  });
+  Object.entries(byPlayer).forEach(([name,list])=>{
+    list.sort((a,b)=>a.abs-b.abs);
+    for(let i=1;i<list.length;i++){
+      if(list[i].si!==list[i-1].si) continue; // dias diferentes: descanso garantido
+      const gap=list[i].abs-list[i-1].absEnd;
+      if(gap < state.config.rest) add(list[i].k,{type:'rest', msg:name.split(' ')[0]+': descanso '+Math.max(0,gap)+' min'});
+    }
+  });
+  return warn;
+}
+
+/* ================= RENDER ================= */
+function render(){ state.cats.forEach(applyWO); renderSessions(); renderCats(); renderTabs(); renderBracket(); renderSchedule(); renderSummary(); renderExtras(); if(typeof syncTV==='function') syncTV(); }
+
+/* ================= VISÃO DO EVENTO ================= */
+function renderExtras(){ renderDaySummary(); renderPlayerSelect(); renderPlayerPath(); updatePubBtn(); }
+
+/* ================= PUBLICAÇÃO / NOTIFICAÇÕES ================= */
+function currentAgenda(){
+  const times=computeTimes();
+  const map={};
+  state.schedule.forEach((court,ci)=>court.forEach(k=>{
+    const f=findByKey(k); const t=times[k]; if(!f||!t)return;
+    const {cat,m}=f;
+    if(m.winner) return; // jogo concluído não gera aviso de agenda
+    [['p1','p2'],['p2','p1']].forEach(([me,other])=>{
+      const r=resolveSide(cat,m[me]);
+      if(!r.known)return;
+      const opp=resolveSide(cat,m[other]);
+      (map[r.name]=map[r.name]||{})[m.code]={day:t.day, start:t.start, court:courtName(ci), opp:opp.name, oppKnown:opp.known, cat:cat.name};
+    });
+  }));
+  return map;
+}
+function pendingNotifs(){
+  const cur=currentAgenda();
+  const pub=state.published||{};
+  const msgs=[];
+  Object.entries(cur).forEach(([player, games])=>{
+    Object.entries(games).forEach(([code,g])=>{
+      const old=(pub[player]||{})[code];
+      const vs=g.oppKnown?(' vs '+g.opp):'';
+      if(!old){
+        msgs.push({player, txt:`🎾 T11 Torneios · ${g.cat}: seu jogo ${code}${vs} está marcado para ${g.day}, ${fmtT(g.start)}, ${g.court}.`});
+      } else if(!old.oppKnown && g.oppKnown && old.day===g.day && Math.abs(old.start-g.start)<10 && old.court===g.court){
+        msgs.push({player, txt:`🎾 T11 Torneios · ${g.cat}: adversário definido no jogo ${code}: ${g.opp}. ${g.day}, ${fmtT(g.start)}, ${g.court}.`});
+      } else if(old.day!==g.day || Math.abs(old.start-g.start)>=10 || old.court!==g.court){
+        msgs.push({player, txt:`🎾 T11 Torneios · ${g.cat}: alteração no jogo ${code}${vs} — agora ${g.day}, ${fmtT(g.start)}, ${g.court} (antes: ${old.day}, ${fmtT(old.start)}, ${old.court}).`});
+      }
+    });
+  });
+  // jogos publicados que saíram da agenda por W.O.: avisa quem avançou
+  Object.entries(pub).forEach(([player, games])=>{
+    Object.entries(games).forEach(([code,g])=>{
+      if((cur[player]||{})[code]) return;
+      let fm=null, fc=null;
+      state.cats.forEach(c=>(c.matches||[]).forEach(m=>{ if(m.code===code){fm=m; fc=c;} }));
+      if(fm && fm.woAuto && resolveSide(fc, fm.winner===1?fm.p1:fm.p2).name===player){
+        msgs.push({player, txt:`🎾 T11 Torneios · ${g.cat}: o jogo ${code} de ${g.day} ${fmtT(g.start)} não será realizado — você avança por W.O.`});
+      }
+    });
+  });
+  msgs.sort((a,b)=>a.player.localeCompare(b.player));
+  return msgs;
+}
+function updatePubBtn(){
+  const n=pendingNotifs().length;
+  const b=$('pubBtn');
+  b.textContent = n? `Publicar alterações (${n})` : 'Publicar alterações';
+  b.style.opacity = n? 1 : .55;
+}
+function openPublish(){
+  const msgs=pendingNotifs();
+  const list=$('pubList');
+  if(!msgs.length){
+    list.innerHTML='<div class="pp-empty">Nenhuma alteração pendente — a agenda publicada está igual à atual.</div>';
+    $('pubConfirm').style.display='none';
+  } else {
+    $('pubConfirm').style.display='inline-block';
+    let cur=null;
+    list.innerHTML=msgs.map(m=>{
+      const head = m.player!==cur ? `<div style="font-size:12px; font-weight:700; margin:12px 0 6px;">${m.player}</div>` : '';
+      cur=m.player;
+      return head+`<div style="background:var(--card2); border:1px solid var(--border); border-radius:10px; padding:9px 12px; font-size:12.5px; margin-bottom:6px; line-height:1.5;">${m.txt}</div>`;
+    }).join('');
+  }
+  $('pubModal').classList.add('open');
+}
+function closePub(){ $('pubModal').classList.remove('open'); }
+function confirmPublish(){
+  const n=pendingNotifs().length;
+  state.published=currentAgenda();
+  closePub();
+  updatePubBtn();
+  toast(n+' notificações enviadas (simulação)');
+}
+
+
+function renderDaySummary(){
+  const times=computeTimes();
+  const days={};
+  state.schedule.forEach((court,ci)=>court.forEach(k=>{
+    if(isGap(k))return;
+    const t=times[k]; if(!t)return;
+    const d=days[t.si]=days[t.si]||{label:t.day, count:0, start:1e9, end:0, courts:{}};
+    d.count++; d.start=Math.min(d.start,t.start); d.end=Math.max(d.end,t.end);
+    d.courts[ci]=Math.max(d.courts[ci]||0,t.end);
+  }));
+  const el=$('daySummary');
+  const keys=Object.keys(days).sort((a,b)=>a-b);
+  el.innerHTML='<div class="ov-title">Previsão por dia</div>'+(keys.length? keys.map(si=>{
+    const d=days[si];
+    const courtsTxt=Object.entries(d.courts).sort((a,b)=>a[0]-b[0]).map(([ci,e])=>courtName(+ci)+' até '+fmtT(e)).join(' · ');
+    return `<div class="day-sum">
+      <span class="dname">${d.label}</span>
+      <span class="range">${fmtT(d.start)} <span class="arrow">→</span> ${fmtT(d.end)}</span>
+      <span class="cnt">${d.count} ${d.count===1?'jogo':'jogos'}</span>
+      <span class="courts-min">${courtsTxt}</span>
+    </div>`;
+  }).join('') : '<div class="pp-empty">Sem jogos programados.</div>');
+}
+
+function renderPlayerSelect(){
+  const sel=$('pathSel'); const cur=sel.value;
+  sel.innerHTML='<option value="">Selecione um tenista…</option>';
+  state.cats.forEach(cat=>{
+    const og=document.createElement('optgroup'); og.label=cat.name;
+    const base=cat.drawPlayers||cat.players;
+    base.forEach((p,i)=>{ const o=document.createElement('option'); o.value=cat.id+':'+i; o.textContent=p; og.appendChild(o); });
+    sel.appendChild(og);
+  });
+  if([...sel.options].some(o=>o.value===cur)) sel.value=cur;
+}
+
+function renderPlayerPath(){
+  const el=$('playerPath');
+  const v=$('pathSel').value;
+  if(!v){ el.innerHTML='<div class="pp-empty">Escolha um tenista para ver dia e horário previsto de cada rodada dele — inclusive as projeções caso avance na chave.</div>'; return; }
+  const [cid,pi]=v.split(':').map(Number);
+  const cat=state.cats.find(c=>c.id===cid);
+  if(!cat){ el.innerHTML=''; return; }
+  if(!cat.matches){ el.innerHTML='<div class="pp-empty">A chave desta categoria ainda não foi sorteada.</div>'; return; }
+  const pname=(cat.drawPlayers||cat.players)[pi];
+  const times=computeTimes();
+  const roundOf = mm => roundName(cat.matches.filter(x=>x.round===mm.round).length);
+  let m=cat.matches.find(x=>x.round===0 && ((x.p1.type==='player'&&x.p1.idx===pi)||(x.p2.type==='player'&&x.p2.idx===pi)));
+  const items=[]; let eliminated=false, firstPending=true;
+  while(m && !eliminated){
+    const next=cat.matches.find(x=>(x.p1.type==='winner'&&x.p1.ref===m.id)||(x.p2.type==='winner'&&x.p2.ref===m.id));
+    if(m.auto){
+      items.push(`<div class="pp-item"><span class="pp-when">—</span><div><b>${roundOf(m)}</b> · bye, avança direto</div></div>`);
+    } else {
+      const r1=resolveSide(cat,m.p1), r2=resolveSide(cat,m.p2);
+      const opp = (r1.known && r1.name===pname) ? r2 : r1;
+      const t=times[matchKey(cat,m)];
+      let status;
+      if(m.winner){
+        const wname=resolveSide(cat, m.winner===1?m.p1:m.p2).name;
+        if(wname===pname) status='won'; else { status='lost'; eliminated=true; }
+      } else if(firstPending){ status='next'; firstPending=false; }
+      else status='if';
+      const when = t? (t.day+' '+fmtT(t.start)) : 'sem horário';
+      const tag = {
+        won:`<span class="badge ok">Venceu${m.score?' '+scoreStr(m):''}</span>`,
+        lost:`<span class="badge over">Eliminado${m.score?' '+scoreStr(m):''}</span>`,
+        next:`<span class="badge next">Próximo jogo</span>`,
+        if:`<span class="badge if">Se avançar</span>`
+      }[status];
+      items.push(`<div class="pp-item ${status}"><span class="pp-when">${when}</span><div><b>${roundOf(m)}</b> · ${m.code} vs ${opp.name} ${tag}</div></div>`);
+    }
+    m=next;
+  }
+  el.innerHTML=items.join('');
+}
+
+function renderCourtNames(){
+  const box=$('courtNames'); if(!box)return;
+  box.innerHTML='';
+  for(let i=0;i<state.config.courts;i++){
+    box.insertAdjacentHTML('beforeend',
+      `<div><label>Nome da quadra ${i+1}</label><input placeholder="Quadra ${i+1}" value="${(state.config.courtNames[i]||'')}" onchange="updCourtName(${i},this.value)"></div>`);
+  }
+}
+function updCourtName(i,v){ state.config.courtNames[i]=v; renderSchedule(); renderExtras(); }
+function renderSessions(){
+  renderCourtNames();
+  const list=$('sessionsList'); list.innerHTML='';
+  state.config.sessions.forEach((s,i)=>{
+    const row=document.createElement('div'); row.className='session-row';
+    row.innerHTML=`
+      <input type="date" value="${s.date||''}" onchange="updSession(${i},'date',this.value)">
+      <input value="${s.label||''}" placeholder="ex.: noite" onchange="updSession(${i},'label',this.value)">
+      <input type="time" value="${s.start}" onchange="updSession(${i},'start',this.value)">
+      <input type="time" value="${s.end}" onchange="updSession(${i},'end',this.value)">
+      <button class="rm" title="Remover dia" onclick="rmSession(${i})">×</button>`;
+    list.appendChild(row);
+  });
+}
+function updSession(i,f,v){
+  state.config.sessions[i][f]=v;
+  if(f==='date'){
+    // mantém os dias em ordem cronológica (sem data ficam ao final, na ordem em que estão)
+    state.config.sessions.sort((a,b)=>{
+      if(a.date && b.date) return a.date<b.date? -1 : a.date>b.date? 1 : 0;
+      return a.date? -1 : b.date? 1 : 0;
+    });
+    renderSessions();
+  }
+  renderSchedule(); renderSummary(); renderExtras(); renderBracket();
+}
+function addSession(){
+  const withDate=state.config.sessions.filter(s=>s.date);
+  let date='';
+  if(withDate.length){
+    const d=new Date(withDate[withDate.length-1].date+'T12:00:00');
+    d.setDate(d.getDate()+1);
+    date=d.toISOString().slice(0,10);
+  }
+  state.config.sessions.push({date, label:'', start:'08:00', end:'18:00'});
+  render();
+}
+function rmSession(i){ if(state.config.sessions.length<=1){toast('Mantenha pelo menos um dia de jogo');return;} state.config.sessions.splice(i,1); render(); }
+
+function renderCats(){
+  const row=$('catRow'); row.innerHTML='';
+  state.cats.forEach(cat=>{
+    const drawn = !!cat.matches;
+    const stale = drawn && JSON.stringify(cat.players)!==JSON.stringify(cat.drawPlayers);
+    const N=cat.players.length;
+    let D=2; while(D<N) D*=2;
+    const numSeeds=Math.max(2, Math.min(D/4, N));
+    const byes=D-N;
+    const byeSeeds=Math.min(byes, numSeeds); // byes determinísticos: melhores cabeças, na ordem
+    const plist=cat.players.map((p,i)=>{
+      const seed=i<numSeeds, bye=i<byeSeeds;
+      const dIdx = drawn? cat.drawPlayers.indexOf(p) : -1;
+      const isOut = dIdx>=0 && cat.wo && cat.wo[dIdx];
+      const woBtn = dIdx<0 ? '' : isOut
+        ? `<button class="pwo" title="Desfazer desistência" onclick="unWithdrawPlayer(${cat.id},${dIdx})">↩ VOLTAR</button>`
+        : `<button class="pwo" title="Marcar desistência — jogos pendentes viram W.O. para o adversário" onclick="withdrawPlayer(${cat.id},${dIdx})">W.O.</button>`;
+      return `<li draggable="true" data-cat="${cat.id}" data-idx="${i}" class="${seed?'seed':''}${isOut?' out':''}" title="Arraste para reordenar o ranking">
+        <span class="grip">⋮⋮</span><span class="pnum">${i+1}</span><span class="pname">${p}</span>
+        ${isOut?'<span class="stag out">DESISTIU</span>':''}${seed&&!isOut?'<span class="stag">CABEÇA '+(i+1)+'</span>':''}${bye&&!isOut?'<span class="stag bye">BYE</span>':''}
+        ${woBtn}
+        <button class="prm" title="Remover da lista de inscritos (vale no próximo sorteio)" onclick="removePlayer(${cat.id},${i})">×</button></li>`;
+    }).join('');
+    const el=document.createElement('div');
+    el.className='card cat-card';
+    el.innerHTML=`<h3><span class="dot" style="background:${cat.color}"></span>${cat.name}</h3>
+      <div class="meta">${N} jogadores · chave de ${D}</div>
+      <div class="draw-note ${drawn && !stale?'ok':''}">${!drawn?'Aguardando sorteio da chave':stale?'Lista alterada — re-sorteie a chave para aplicar':'Chave sorteada'}</div>
+      <ol class="plist">${plist}</ol>
+      <div class="addp">
+        <input placeholder="Nome do novo jogador" id="np${cat.id}" onkeydown="if(event.key==='Enter')addPlayer(${cat.id})">
+        <button class="btn" onclick="addPlayer(${cat.id})">+ Incluir</button>
+      </div>
+      <div class="actions">
+        <button class="btn ${drawn && !stale?'':'primary'}" onclick="sortearChave(${cat.id})">${drawn?'Re-sortear':'Sortear chave'}</button>
+        <button class="btn danger" onclick="removeCat(${cat.id})">Excluir categoria</button>
+      </div>`;
+    row.appendChild(el);
+    attachPlayerDnD(el);
+  });
+  const add=document.createElement('button');
+  add.className='add-cat'; add.textContent='+ Nova categoria';
+  add.onclick=openModal;
+  row.appendChild(add);
+}
+function addPlayer(catId){
+  const cat=state.cats.find(c=>c.id===catId); if(!cat)return;
+  const inp=$('np'+catId);
+  const name=inp.value.trim();
+  if(!name){ toast('Digite o nome do jogador'); return; }
+  if(cat.players.includes(name) || (cat.drawPlayers||[]).includes(name)){ toast('Este jogador já está na categoria'); return; }
+  if(cat.matches){ openInclude(catId, name); return; }
+  cat.players.push(name);
+  renderCats(); renderExtras();
+  const again=$('np'+catId); if(again)again.focus();
+  toast(name+' incluído no fim da lista — arraste para a posição do ranking');
+}
+
+/* ---- Inclusão em chave já sorteada: escolha da vaga ---- */
+let incCtx=null;
+function openInclude(catId, name){
+  const cat=state.cats.find(c=>c.id===catId); if(!cat)return;
+  const vac=drawVacancies(cat);
+  incCtx={catId, name, opts:[{id:'list', label:'Apenas na lista de inscritos', hint:'Não entra na chave atual — vale a partir do próximo sorteio.'}]
+    .concat(vac.map((v,i)=>({id:'v'+i, label:v.label, hint:v.type==='bye'?'Entra direto na chave atual, sem re-sorteio.':'Herda a posição na chave atual, sem re-sorteio.', v}))),
+    choice:'list'};
+  $('incTitle').textContent='Incluir '+name;
+  $('incSub').textContent=cat.name+' — a chave já foi sorteada e não será refeita. Onde o jogador entra?'+(vac.length?'':' (nenhuma vaga aberta na chave no momento)');
+  $('incList').innerHTML = incCtx.opts.map(o=>
+    `<div class="wopt" id="inc_${o.id}" onclick="pickInc('${o.id}')"><div><div class="nm">${o.label}</div><div style="font-size:11px; color:var(--faint); margin-top:2px;">${o.hint}</div></div></div>`
+  ).join('');
+  pickInc('list');
+  $('incModal').classList.add('open');
+}
+function pickInc(id){
+  incCtx.choice=id;
+  incCtx.opts.forEach(o=>$('inc_'+o.id).classList.toggle('sel', o.id===id));
+}
+function closeInc(){ $('incModal').classList.remove('open'); incCtx=null; }
+function confirmInclude(){
+  const cat=state.cats.find(c=>c.id===incCtx.catId);
+  const opt=incCtx.opts.find(o=>o.id===incCtx.choice);
+  const name=incCtx.name;
+  if(opt.id==='list'){
+    cat.players.push(name);
+    toast(name+' incluído na lista — entra na chave no próximo sorteio');
+  } else if(opt.v.type==='bye'){
+    applyByeFill(cat, opt.v.mId, name);
+    toast(name+' entrou na vaga de bye — jogo adicionado à programação, ajuste a posição se quiser');
+  } else {
+    applySub(cat, opt.v.idx, name);
+    toast(name+' assumiu o lugar na chave');
+  }
+  const inp=$('np'+incCtx.catId); if(inp)inp.value='';
+  closeInc(); render();
+}
+function removePlayer(catId, idx){
+  const cat=state.cats.find(c=>c.id===catId); if(!cat)return;
+  if(cat.players.length<=3){ toast('Mantenha pelo menos 3 jogadores na categoria'); return; }
+  const [p]=cat.players.splice(idx,1);
+  renderCats(); renderExtras();
+  toast(p+' removido da lista');
+}
+
+/* ---- Drag and drop do ranking de jogadores ---- */
+let dragP=null;
+function attachPlayerDnD(cardEl){
+  cardEl.querySelectorAll('.plist li').forEach(li=>{
+    li.addEventListener('dragstart',e=>{
+      e.stopPropagation();
+      dragP={cat:+li.dataset.cat, idx:+li.dataset.idx};
+      li.classList.add('dragging');
+      e.dataTransfer.effectAllowed='move';
+    });
+    li.addEventListener('dragend',()=>{
+      dragP=null;
+      document.querySelectorAll('.plist li').forEach(x=>x.classList.remove('dragging','insert-before','insert-after'));
+    });
+    li.addEventListener('dragover',e=>{
+      if(!dragP || +li.dataset.cat!==dragP.cat) return; // só reordena dentro da mesma categoria
+      e.preventDefault(); e.stopPropagation();
+      const rect=li.getBoundingClientRect();
+      const after=(e.clientY-rect.top) > rect.height/2;
+      li.classList.toggle('insert-before', !after);
+      li.classList.toggle('insert-after', after);
+    });
+    li.addEventListener('dragleave',()=>li.classList.remove('insert-before','insert-after'));
+    li.addEventListener('drop',e=>{
+      if(!dragP || +li.dataset.cat!==dragP.cat) return;
+      e.preventDefault(); e.stopPropagation();
+      const rect=li.getBoundingClientRect();
+      const after=(e.clientY-rect.top) > rect.height/2;
+      let to=+li.dataset.idx + (after?1:0);
+      if(dragP.idx < to) to--;
+      movePlayer(dragP.cat, dragP.idx, to);
+    });
+  });
+}
+function movePlayer(catId, from, to){
+  const cat=state.cats.find(c=>c.id===catId);
+  if(!cat || from===to) return;
+  // a chave usa um snapshot do ranking feito no sorteio, então editar a lista nunca a corrompe;
+  // o card apenas sinaliza que a lista mudou e o re-sorteio aplica a nova ordem
+  const [p]=cat.players.splice(from,1);
+  cat.players.splice(to,0,p);
+  renderCats(); renderExtras();
+}
+
+function renderTabs(){
+  const tabs=$('catTabs'); tabs.innerHTML='';
+  state.cats.forEach(cat=>{
+    const b=document.createElement('button');
+    b.className='tab'+(state.activeCat===cat.id?' active':'');
+    b.textContent=cat.name;
+    b.onclick=()=>{state.activeCat=cat.id; renderTabs(); renderBracket();};
+    tabs.appendChild(b);
+  });
+}
+
+function scoreStr(m){
+  if(m.winner && !m.score && m.woAuto) return 'W.O.';
+  return (m.score||[]).map(s=>s[0]+'/'+s[1]+(s[2]?'('+Math.min(s[2][0],s[2][1])+')':'')).join(' ');
+}
+
+function renderBracket(){
+  const el=$('bracket'); el.innerHTML='';
+  const cat = state.cats.find(c=>c.id===state.activeCat);
+  if(!cat){ el.innerHTML='<div style="color:var(--faint); padding:20px;">Crie uma categoria para gerar a chave.</div>'; return; }
+  if(!cat.matches){
+    el.innerHTML=`<div style="color:var(--faint); padding:20px; display:flex; flex-direction:column; gap:12px; align-items:flex-start;">
+      <span>Chave ainda não sorteada.</span>
+      <button class="btn primary" onclick="sortearChave(${cat.id})">Sortear chave</button></div>`;
+    return;
+  }
+  const times=computeTimes();
+  for(let r=0;r<cat.rounds;r++){
+    const ms = cat.matches.filter(m=>m.round===r);
+    const col=document.createElement('div'); col.className='round';
+    const t=document.createElement('div'); t.className='round-title'; t.textContent=roundName(ms.length);
+    col.appendChild(t);
+    ms.forEach(m=>{
+      const r1=resolveSide(cat,m.p1), r2=resolveSide(cat,m.p2);
+      const playable = !m.auto && r1.known && r2.known;
+      const tm = times[matchKey(cat,m)];
+      const box=document.createElement('div'); box.className='match'+(playable?' playable':'');
+      box.innerHTML=`<div class="code"><span>${m.code}${m.auto?' · bye':''}</span></div>
+        ${tm?`<div class="when">${m.winner?'✓ Concluído · ':''}${tm.day} · ${fmtT(tm.start)}</div>`:''}`;
+      [[r1,1],[r2,2]].forEach(([rs,num])=>{
+        const div=document.createElement('div');
+        let cls='side';
+        if(!rs.known) cls+=' tbd';
+        if(m.winner===num) cls+=' winner';
+        if(m.winner && m.winner!==num && rs.known) cls+=' loser';
+        div.className=cls;
+        let scs='';
+        if(m.score && m.score.length){
+          scs='<span class="scs">'+m.score.map(s=>{
+            const mine=s[num-1], other=s[num===1?1:0];
+            const sup=s[2]?`<sup>${s[2][num-1]}</sup>`:'';
+            return `<span class="sc ${mine>other?'w':''}">${mine}${sup}</span>`;
+          }).join('')+'</span>';
+        } else if(m.winner===num && m.woAuto){
+          scs='<span class="scs"><span class="sc wo">W.O.</span></span>';
+        }
+        div.innerHTML=`<span class="seed">${rs.seed?rs.seed:''}</span><span class="nm ${rs.bye?'bye':''}">${rs.name}</span>${scs}${m.winner===num?'<span style="color:var(--green)">✓</span>':''}`;
+        box.appendChild(div);
+      });
+      if(playable){ box.title='Clique para lançar o resultado'; box.onclick=()=>openResult(cat.id, m.id); }
+      col.appendChild(box);
+    });
+    el.appendChild(col);
+  }
+}
+function clearDownstream(cat, changedId){
+  cat.matches.forEach(m=>{
+    ['p1','p2'].forEach(s=>{
+      if(m[s].type==='winner' && m[s].ref===changedId && m.winner){
+        m.winner=null; m.score=null; clearDownstream(cat, m.id);
+      }
+    });
+  });
+}
+
+function renderSchedule(){
+  const wrap=$('courts'); wrap.innerHTML='';
+  const times=computeTimes();
+  const warns=computeWarnings(times);
+  const leg=$('legend'); leg.innerHTML='';
+  state.cats.forEach(cat=>{
+    const s=document.createElement('span');
+    s.innerHTML=`<span class="dot" style="background:${cat.color}"></span>${cat.name}`;
+    leg.appendChild(s);
+  });
+  if(!state.schedule.flat().some(k=>!isGap(k))){
+    wrap.innerHTML='<div class="empty-court" style="padding:30px;">Sorteie uma chave para gerar a programação.</div>';
+    return;
+  }
+  const S=state.config.sessions.length? state.config.sessions : [{start:'08:00', end:'18:00'}];
+  const nC=state.config.courts;
+  const usedSi=[...new Set(state.schedule.flat().map(k=>times[k]?times[k].si:null).filter(v=>v!=null))].sort((a,b)=>a-b);
+  const container=document.createElement('div'); container.className='sched-days';
+  usedSi.forEach(si=>{
+    const sess=S[si]||S[S.length-1];
+    const anyKey=state.schedule.flat().find(k=>times[k]&&times[k].si===si);
+    const dayLabel=times[anyKey].day;
+    const startMin=toMin(sess.start);
+    let endMin=toMin(sess.end);
+    state.schedule.forEach(c=>c.forEach(k=>{ const t=times[k]; if(t&&t.si===si) endMin=Math.max(endMin,t.end); }));
+    const H=(endMin-startMin)*PXM;
+    const nGames=state.schedule.flat().filter(k=>!isGap(k)&&times[k]&&times[k].si===si).length;
+
+    const day=document.createElement('div'); day.className='sday';
+    day.innerHTML=`<div class="sday-head"><span class="dname">${dayLabel}</span><span class="cnt">${nGames} ${nGames===1?'jogo':'jogos'} · janela ${sess.start}–${sess.end}</span></div>`;
+    const scroll=document.createElement('div'); scroll.className='sday-scroll';
+    const grid=document.createElement('div'); grid.className='sgrid';
+    grid.style.gridTemplateColumns=`52px repeat(${nC},minmax(190px,1fr))`;
+
+    grid.insertAdjacentHTML('beforeend','<div class="corner"></div>');
+    for(let ci=0;ci<nC;ci++){
+      const gk=state.schedule[ci].filter(k=>!isGap(k)&&times[k]&&times[k].si===si);
+      const lastT=gk.length? times[gk[gk.length-1]] : null;
+      grid.insertAdjacentHTML('beforeend',`<div class="chead"><span class="cdot" style="background:${COURT_COLORS[ci%COURT_COLORS.length]}"></span>${courtName(ci)} <span class="end">${lastT?'· até '+fmtT(lastT.end):'· livre'}</span></div>`);
+    }
+
+    const ruler=document.createElement('div'); ruler.className='truler'; ruler.style.height=H+'px';
+    ruler.dataset.date=sess.date||''; ruler.dataset.start=startMin; ruler.dataset.h=H;
+    for(let h=Math.ceil(startMin/60); h*60<=endMin; h++){
+      ruler.insertAdjacentHTML('beforeend',`<span style="top:${(h*60-startMin)*PXM-6}px">${String(h).padStart(2,'0')}h</span>`);
+    }
+    ruler.insertAdjacentHTML('beforeend','<span class="nowtag" style="display:none;"></span>');
+    grid.appendChild(ruler);
+
+    for(let ci=0;ci<nC;ci++){
+      const canvas=document.createElement('div');
+      canvas.className='tcanvas';
+      canvas.dataset.court=ci;
+      canvas.dataset.date=sess.date||''; canvas.dataset.start=startMin; canvas.dataset.h=H;
+      canvas.style.height=H+'px';
+      canvas.style.backgroundSize=`100% ${60*PXM}px`;
+      canvas.style.backgroundPosition=`0 ${(((60-(startMin%60))%60))*PXM}px`;
+      canvas.insertAdjacentHTML('beforeend','<div class="nowline" style="display:none;"></div>');
+      const items=state.schedule[ci].filter(k=>times[k]&&times[k].si===si);
+      items.forEach(k=>{
+        const t=times[k];
+        const top=(t.start-startMin)*PXM;
+        const hh=Math.max(20,(t.end-t.start)*PXM-2);
+        if(isGap(k)){
+          if(t.dur<=0)return;
+          const g=document.createElement('div'); g.className='tgap gapcard'; g.dataset.key=k;
+          g.style.top=top+'px'; g.style.height=hh+'px';
+          g.innerHTML=`<span>livre ${fmtT(t.start)}–${fmtT(t.end)} <span style="color:var(--faint)">· ~${t.dur} min</span></span><button title="Remover janela (antecipa os jogos seguintes)">×</button>`;
+          g.querySelector('button').onclick=e=>{ e.stopPropagation(); rmGap(k); };
+          g.addEventListener('dragover',e=>{ e.preventDefault(); e.stopPropagation(); g.classList.add('hot'); });
+          g.addEventListener('dragleave',()=>g.classList.remove('hot'));
+          g.addEventListener('drop',e=>{ e.preventDefault(); e.stopPropagation(); if(dragKey && dragKey!==k) moveKey(dragKey, ci, k, false); });
+          canvas.appendChild(g);
+          return;
+        }
+        const f=findByKey(k); if(!f)return;
+        const {cat,m}=f;
+        const r1=resolveSide(cat,m.p1), r2=resolveSide(cat,m.p2);
+        const card=document.createElement('div');
+        card.className='tcard mcard'+(m.winner?' done':'')+(t.late?' late':'');
+        card.style.top=top+'px'; card.style.height=hh+'px';
+        card.style.borderLeftColor=COURT_COLORS[ci%COURT_COLORS.length];
+        card.draggable=true; card.dataset.key=k;
+        card.dataset.date=sess.date||''; card.dataset.s=t.start; card.dataset.e=t.end;
+        const wlist=warns[k]||[];
+        if(t.late) wlist.unshift({type:'over', msg:'atrasado +'+t.lateMin+' min'});
+        card.title=`${cat.name} · ${m.code} · ${fmtT(t.start)}–${fmtT(t.end)} (~${t.dur} min)`+
+          `\n${r1.name} vs ${r2.name}`+
+          (m.winner? '\nConcluído'+(scoreStr(m)?' '+scoreStr(m):'') : '')+
+          (t.actual? '\nTérmino real '+fmtT(t.end):'')+
+          (wlist.length? '\n⚠ '+wlist.map(w=>w.msg).join(' · '):'');
+        card.innerHTML=`
+          <div class="t"><span>${fmtT(t.start)} · ${m.code}</span><span class="ok"><span class="ldot"></span> ${m.winner?'✓ '+scoreStr(m):''}${t.actual?' ⏱':''}</span></div>
+          <div class="p"><span class="${r1.known?'':'tbd'}">${r1.name}</span> <span style="color:var(--faint)">vs</span> <span class="${r2.known?'':'tbd'}">${r2.name}</span></div>
+          <div class="c"><span class="dot" style="background:${cat.color}"></span>${cat.name}</div>
+          ${wlist.length?'<div class="wb">'+wlist.map(w=>`<span class="badge ${w.type}">${w.msg}</span>`).join('')+'</div>':''}`;
+        if(!m.auto && r1.known && r2.known){
+          card.onclick=()=>openResult(cat.id, m.id);
+        }
+        addDnD(card);
+        canvas.appendChild(card);
+      });
+      // tempo livre até o fim da janela do dia
+      const dayEndMin=toMin(sess.end);
+      const lastItem=items.length? items[items.length-1] : null;
+      const lastEnd=lastItem? times[lastItem].end : startMin;
+      if(dayEndMin - lastEnd >= 3 || (!items.length && dayEndMin>startMin)){
+        if(lastItem && isGap(lastItem)){
+          // a última janela do dia se estende visualmente até o fim da janela
+          const gEl=[...canvas.querySelectorAll('.tgap')].find(el=>el.dataset.key===lastItem);
+          if(gEl){
+            const t0=times[lastItem];
+            gEl.style.height=Math.max(20,(dayEndMin-t0.start)*PXM-2)+'px';
+            gEl.querySelector('span').innerHTML=`livre ${fmtT(t0.start)}–${fmtT(dayEndMin)} <span style="color:var(--faint)">· ~${Math.round(dayEndMin-t0.start)} min</span>`;
+          }
+        } else {
+          const g=document.createElement('div');
+          g.className='tgap gapcard imp';
+          g.style.top=((lastEnd-startMin)*PXM)+'px';
+          g.style.height=Math.max(20,(dayEndMin-lastEnd)*PXM-2)+'px';
+          g.innerHTML=`<span>livre ${fmtT(lastEnd)}–${fmtT(dayEndMin)} <span style="color:var(--faint)">· ~${Math.round(dayEndMin-lastEnd)} min</span></span>`;
+          g.addEventListener('dragover',e=>{ e.preventDefault(); e.stopPropagation(); g.classList.add('hot'); });
+          g.addEventListener('dragleave',()=>g.classList.remove('hot'));
+          g.addEventListener('drop',e=>{
+            e.preventDefault(); e.stopPropagation();
+            if(!dragKey)return;
+            if(lastItem && lastItem!==dragKey){ moveKey(dragKey, ci, lastItem, true); return; }
+            const nk=state.schedule[ci].find(k=>times[k]&&times[k].si>si)||null;
+            if(nk && nk!==dragKey) moveKey(dragKey, ci, nk, false);
+            else moveKey(dragKey, ci, null);
+          });
+          canvas.appendChild(g);
+        }
+      }
+      // drop no espaço vazio do dia: entra no fim daquele dia nesta quadra
+      const lastKey = items.length? items[items.length-1] : null;
+      const nextKey = state.schedule[ci].find(k=>times[k] && times[k].si>si) || null;
+      canvas.addEventListener('dragover',e=>{ e.preventDefault(); canvas.classList.add('dragover'); });
+      canvas.addEventListener('dragleave',e=>{ if(e.target===canvas) canvas.classList.remove('dragover'); });
+      canvas.addEventListener('drop',e=>{
+        canvas.classList.remove('dragover');
+        if(e.target!==canvas) return;
+        e.preventDefault();
+        if(!dragKey) return;
+        if(lastKey && lastKey!==dragKey) moveKey(dragKey, ci, lastKey, true);
+        else if(nextKey && nextKey!==dragKey) moveKey(dragKey, ci, nextKey, false);
+        else moveKey(dragKey, ci, null);
+      });
+      grid.appendChild(canvas);
+    }
+    scroll.appendChild(grid);
+    day.appendChild(scroll);
+    container.appendChild(day);
+  });
+  wrap.appendChild(container);
+  updateNow();
+}
+
+/* ---- Linha do "agora" e jogos em andamento ---- */
+function updateNow(){
+  const ds=todayStr();
+  const now=new Date();
+  const nm=now.getHours()*60+now.getMinutes();
+  document.querySelectorAll('.tcanvas').forEach(cv=>{
+    const line=cv.querySelector('.nowline'); if(!line)return;
+    if(cv.dataset.date!==ds){ line.style.display='none'; return; }
+    const h=+cv.dataset.h;
+    let top=(nm-(+cv.dataset.start))*PXM;
+    const off = top<0 || top>h;
+    line.style.display='block';
+    line.style.top=Math.max(0,Math.min(h-2,top))+'px';
+    line.classList.toggle('off', off);
+  });
+  document.querySelectorAll('.truler').forEach(r=>{
+    const tag=r.querySelector('.nowtag'); if(!tag)return;
+    if(r.dataset.date!==ds){ tag.style.display='none'; return; }
+    const h=+r.dataset.h;
+    let top=(nm-(+r.dataset.start))*PXM;
+    tag.style.display='block';
+    tag.style.top=(Math.max(0,Math.min(h-14,top-7)))+'px';
+    tag.textContent=fmtT(nm);
+  });
+  document.querySelectorAll('.tcard').forEach(c=>{
+    const live=c.dataset.date===ds && +c.dataset.s<=nm && nm < +c.dataset.e && !c.classList.contains('done');
+    c.classList.toggle('live', live);
+  });
+  // jogo estourou o previsto sem resultado: re-renderiza para esticar o bloco e empurrar a fila
+  const overdue=[...document.querySelectorAll('.tcard')].some(c=>
+    c.dataset.date===ds && !c.classList.contains('done') && +c.dataset.s<=nm && nm >= +c.dataset.e);
+  if(overdue && !document.querySelector('.dragging')){
+    renderSchedule(); renderSummary(); renderExtras();
+  }
+  syncTV();
+}
+setInterval(updateNow, 30000);
+
+/* ================= MODO TV (telão) ================= */
+let tvWin=null, tvMode=null, tvKind=null, tvCatIdx=0;
+function openTV(mode){
+  tvMode=mode;
+  // 1ª tentativa: janela separada (para arrastar à TV)
+  try{
+    if(tvWin && !tvWin.closed){ tvKind='win'; tvWin.focus(); syncTV(); return; }
+    const w=window.open('', 'T11TV', 'width=1366,height=768');
+    if(w){
+      const css=document.querySelector('style').textContent;
+      w.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Tennis T11 · Telão</title><style>${css}
+        body{padding:20px 28px; overflow-x:hidden;}
+        .tv-head{display:flex; align-items:center; gap:14px; margin-bottom:16px;}
+        .tv-head h1{font-size:22px; font-weight:700;}
+        .tv-sub{color:var(--muted); font-size:13px;}
+        .tv-clock{margin-left:auto; font-size:30px; font-weight:800; font-variant-numeric:tabular-nums; color:var(--green);}
+        #tvBody{pointer-events:none;}
+      </style></head><body>
+        <div class="tv-head"><div class="logo">🎾</div><div><h1 id="tvTitle"></h1><div class="tv-sub" id="tvSub"></div></div><div class="tv-clock" id="tvClock"></div></div>
+        <div id="tvBody"></div>
+      </body></html>`);
+      w.document.close();
+      w.document.getElementById('tvBody'); // valida acesso (sandbox pode bloquear)
+      tvWin=w; tvKind='win';
+      syncTV();
+      toast(mode==='sched'?'Telão aberto: programação ao vivo':'Telão aberto: chaves em rotação');
+      return;
+    }
+  }catch(e){ try{ if(tvWin) tvWin.close(); }catch(_){} tvWin=null; }
+  // 2ª via: telão em tela cheia na própria página (funciona em qualquer ambiente)
+  tvKind='overlay';
+  $('tvOverlay').classList.add('open');
+  try{ $('tvOverlay').requestFullscreen && $('tvOverlay').requestFullscreen(); }catch(e){}
+  syncTV();
+  toast('Telão aberto em tela cheia — × para fechar');
+}
+function closeTV(){
+  tvKind=null;
+  $('tvOverlay').classList.remove('open');
+  try{ document.fullscreenElement && document.exitFullscreen(); }catch(e){}
+}
+function tvEls(){
+  if(tvKind==='win'){
+    if(!tvWin || tvWin.closed) return null;
+    let d; try{ d=tvWin.document; }catch(e){ return null; }
+    if(!d || !d.getElementById('tvBody')) return null;
+    return {title:d.getElementById('tvTitle'), sub:d.getElementById('tvSub'), clock:d.getElementById('tvClock'), body:d.getElementById('tvBody')};
+  }
+  if(tvKind==='overlay' && $('tvOverlay').classList.contains('open')){
+    return {title:$('tvTitleL'), sub:$('tvSubL'), clock:$('tvClockL'), body:$('tvBodyL')};
+  }
+  return null;
+}
+function syncTV(){
+  const el=tvEls(); if(!el) return;
+  try{
+    const n=new Date();
+    el.clock.textContent=fmtT(n.getHours()*60+n.getMinutes());
+    if(tvMode==='sched'){
+      el.title.textContent='Programação das quadras';
+      el.sub.textContent='Tennis T11 · atualização automática';
+      el.body.innerHTML=$('courts').innerHTML;
+    } else {
+      const cats=state.cats.filter(c=>c.matches);
+      if(!cats.length){ el.body.innerHTML='<div class="pp-empty">Nenhuma chave sorteada.</div>'; return; }
+      const cat=cats[tvCatIdx%cats.length];
+      const keep=state.activeCat;
+      state.activeCat=cat.id; renderBracket();
+      el.title.textContent='Chave · '+cat.name;
+      el.sub.textContent='Tennis T11 · '+FORMATS[cat.format].label+(cats.length>1?' · alternando categorias':'');
+      el.body.innerHTML='<div class="card"><div class="bracket-wrap">'+$('bracket').outerHTML+'</div></div>';
+      if(keep!==cat.id){ state.activeCat=keep; renderBracket(); }
+    }
+  }catch(e){ /* telão indisponível — segue o jogo */ }
+}
+setInterval(()=>{
+  if(!tvEls()) return;
+  if(tvMode==='bracket' && state.cats.filter(c=>c.matches).length>1) tvCatIdx++;
+  syncTV();
+}, 12000);
+
+function renderSummary(){
+  const times=computeTimes();
+  const gameKeys=state.schedule.flat().filter(k=>!isGap(k));
+  const all=gameKeys.map(k=>times[k]).filter(Boolean);
+  const totalMatches=gameKeys.length;
+  let endTxt='—';
+  if(all.length){ const last=all.reduce((a,b)=>a.absEnd>b.absEnd?a:b); endTxt=last.day+' '+fmtT(last.end); }
+  $('summaryPill').innerHTML = totalMatches
+    ? `<b>${totalMatches}</b> jogos · <b>${state.config.courts}</b> quadras · término <b>${endTxt}</b>`
+    : 'Nenhum jogo programado';
+  $('courtsVal').textContent = state.config.courts;
+}
+
+/* ================= DRAG & DROP ================= */
+let dragKey=null, didDrag=false;
+function addDnD(card){
+  card.addEventListener('dragstart',e=>{ dragKey=card.dataset.key; didDrag=true; card.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; });
+  card.addEventListener('dragend',()=>{ dragKey=null; setTimeout(()=>didDrag=false,50); document.querySelectorAll('.dragging,.insert-before').forEach(x=>x.classList.remove('dragging','insert-before')); document.querySelectorAll('.court.dragover').forEach(x=>x.classList.remove('dragover')); });
+  card.addEventListener('dragover',e=>{ e.preventDefault(); e.stopPropagation(); card.classList.add('insert-before'); });
+  card.addEventListener('dragleave',()=>card.classList.remove('insert-before'));
+  card.addEventListener('drop',e=>{
+    e.preventDefault(); e.stopPropagation();
+    if(!dragKey || dragKey===card.dataset.key) return;
+    const rect=card.getBoundingClientRect();
+    const after=(e.clientY-rect.top) > rect.height/2;
+    moveKey(dragKey, card.closest('[data-court]').dataset.court*1, card.dataset.key, after);
+  });
+  // evita abrir o modal logo após soltar o drag
+  card.addEventListener('click',e=>{ if(didDrag){ e.stopImmediatePropagation(); e.preventDefault(); } }, true);
+}
+let gid=1;
+function isGap(k){ return typeof k==='string' && k.startsWith('gap:'); }
+function gapDur(k){ return +k.split(':')[2]; }
+function rmGap(key){
+  state.schedule.forEach(c=>{ const i=c.indexOf(key); if(i>=0)c.splice(i,1); });
+  renderSchedule(); renderSummary(); renderExtras(); renderBracket();
+  toast('Janela removida — jogos seguintes antecipados');
+}
+function moveKey(key, toCourt, refKey, after){
+  // ao sair, o jogo deixa uma janela livre no lugar (nada é antecipado automaticamente)
+  state.schedule.forEach(c=>{
+    const i=c.indexOf(key);
+    if(i>=0){
+      c.splice(i,1);
+      const f=findByKey(key);
+      if(f && i<c.length) c.splice(i,0,'gap:'+(gid++)+':'+matchDuration(f.cat));
+    }
+  });
+  const court=state.schedule[toCourt];
+  if(refKey && court.indexOf(refKey)>=0){
+    const i=court.indexOf(refKey);
+    if(isGap(refKey)){
+      // entra na janela livre, consumindo o espaço dela
+      const f=findByKey(key);
+      const rest = gapDur(refKey) - (f?matchDuration(f.cat):0);
+      court.splice(i,1,key);
+      if(rest>5) court.splice(i+1,0,'gap:'+(gid++)+':'+Math.round(rest));
+    } else {
+      court.splice(after? i+1 : i, 0, key);
+    }
+  } else court.push(key);
+  renderSchedule(); renderSummary(); renderExtras(); renderBracket();
+}
+
+/* ================= RESULTADO ================= */
+let resCtx=null;
+function openResult(catId, mId){
+  const cat=state.cats.find(c=>c.id===catId); if(!cat)return;
+  const m=cat.matches[mId];
+  if(m.woAuto){ toast('Jogo decidido por W.O. — para reabrir, desfaça a desistência na aba Categorias'); return; }
+  const r1=resolveSide(cat,m.p1), r2=resolveSide(cat,m.p2);
+  if(!r1.known || !r2.known) return;
+  resCtx={catId, mId, w:m.winner||null};
+  $('resTitle').textContent='Resultado · '+m.code;
+  $('resSub').textContent=cat.name+' · '+FORMATS[cat.format].label;
+  $('wname1').textContent=r1.name;
+  $('wname2').textContent=r2.name;
+  $('resClear').style.display = m.winner? 'inline-block':'none';
+  const grid=$('setsGrid'); grid.innerHTML='';
+  const labels=FORMATS[cat.format].setLabels;
+  labels.forEach((lb,i)=>{
+    const v=(m.score&&m.score[i])||['','',null];
+    const tb=v[2]||null;
+    grid.insertAdjacentHTML('beforeend',
+      `<span class="slabel">${lb}</span>
+       <input type="number" min="0" max="30" id="s${i}a" value="${v[0]}" oninput="checkTB(${i})">
+       <span class="x">×</span>
+       <input type="number" min="0" max="30" id="s${i}b" value="${v[1]}" oninput="checkTB(${i})">
+       <span class="slabel tbl${i}" style="display:none;">· tiebreak</span>
+       <input type="number" min="0" max="50" id="t${i}a" class="tbin tbl${i}" style="display:none;" value="${tb?tb[0]:''}">
+       <span class="x tbl${i}" style="display:none;">×</span>
+       <input type="number" min="0" max="50" id="t${i}b" class="tbin tbl${i}" style="display:none;" value="${tb?tb[1]:''}">`);
+  });
+  labels.forEach((_,i)=>checkTB(i));
+  paintWinner();
+  $('resEnd').value = m.actualEnd!=null ? fmtT(m.actualEnd) : '';
+  $('resModal').classList.add('open');
+}
+function isTBSet(fmt,i,a,b){
+  const need=(FORMATS[fmt].tb||[])[i];
+  return !!need && ((a===need&&b===need-1)||(b===need&&a===need-1));
+}
+function checkTB(i){
+  if(!resCtx) return;
+  const cat=state.cats.find(c=>c.id===resCtx.catId);
+  const a=+$('s'+i+'a').value, b=+$('s'+i+'b').value;
+  const show=isTBSet(cat.format,i,a,b);
+  document.querySelectorAll('.tbl'+i).forEach(el=>el.style.display=show?'':'none');
+}
+function pickWinner(n){ resCtx.w = (resCtx.w===n?null:n); paintWinner(); }
+function paintWinner(){
+  $('wopt1').classList.toggle('sel', resCtx.w===1);
+  $('wopt2').classList.toggle('sel', resCtx.w===2);
+}
+function closeRes(){ $('resModal').classList.remove('open'); resCtx=null; }
+function saveResult(){
+  const cat=state.cats.find(c=>c.id===resCtx.catId);
+  const m=cat.matches[resCtx.mId];
+  const labels=FORMATS[cat.format].setLabels;
+  const score=[];
+  let w1=0,w2=0;
+  labels.forEach((_,i)=>{
+    const a=$('s'+i+'a').value, b=$('s'+i+'b').value;
+    if(a!=='' && b!==''){
+      const pa=+a, pb=+b;
+      const entry=[pa,pb];
+      if(isTBSet(cat.format,i,pa,pb)){
+        const ta=$('t'+i+'a').value, tv=$('t'+i+'b').value;
+        if(ta!=='' && tv!=='') entry.push([+ta,+tv]);
+      }
+      score.push(entry);
+      if(pa>pb)w1++; else if(pb>pa)w2++;
+    }
+  });
+  let winner=resCtx.w;
+  if(!winner && score.length) winner = w1>w2?1 : w2>w1?2 : null;
+  if(!winner){ toast('Selecione o vencedor ou preencha o placar'); return; }
+  m.winner=winner; m.score=score.length?score:null;
+  const ae=$('resEnd').value;
+  m.actualEnd = ae ? toMin(ae) : null;
+  clearDownstream(cat, m.id);
+  closeRes(); render();
+  toast('Resultado salvo: '+m.code);
+}
+function clearResult(){
+  const cat=state.cats.find(c=>c.id===resCtx.catId);
+  const m=cat.matches[resCtx.mId];
+  m.winner=null; m.score=null; m.actualEnd=null;
+  clearDownstream(cat, m.id);
+  closeRes(); render();
+  toast('Resultado removido');
+}
+
+/* ================= CONFIG ================= */
+function changeCourts(d){
+  const n=Math.min(8,Math.max(1,state.config.courts+d));
+  if(n===state.config.courts)return;
+  state.config.courts=n;
+  scheduleAfterCourtChange();
+  render();
+}
+function parseMS(v, fb){
+  v=String(v||'').trim().replace(',',':').replace('.',':');
+  if(!v) return fb;
+  const m=v.match(/^(\d+)(?::([0-5]?\d))?$/);
+  if(!m) return fb;
+  return (+m[1]) + (m[2]? (+m[2])/60 : 0);
+}
+function fmtMS(min){
+  const t=Math.round(min*60);
+  return Math.floor(t/60)+':'+String(t%60).padStart(2,'0');
+}
+function onCfgChange(){
+  const c=state.config;
+  c.minGame=parseMS($('cfgMinGame').value, c.minGame);
+  c.warmup =parseMS($('cfgWarmup').value,  c.warmup);
+  c.buffer =parseMS($('cfgBuffer').value,  c.buffer);
+  c.rest   =parseMS($('cfgRest').value,    c.rest);
+  $('cfgMinGame').value=fmtMS(c.minGame);
+  $('cfgWarmup').value =fmtMS(c.warmup);
+  $('cfgBuffer').value =fmtMS(c.buffer);
+  $('cfgRest').value   =fmtMS(c.rest);
+  renderSchedule(); renderSummary(); renderCats(); renderExtras(); renderBracket();
+}
+
+/* ================= CATEGORIAS ================= */
+function openModal(){
+  $('mName').value=''; $('mPlayers').value='';
+  const sel=$('mFormat'); sel.innerHTML='';
+  Object.entries(FORMATS).forEach(([k,f])=>{ const o=document.createElement('option'); o.value=k; o.textContent=f.label; sel.appendChild(o); });
+  $('modal').classList.add('open');
+}
+function closeModal(){ $('modal').classList.remove('open'); }
+function saveCategory(){
+  const name=$('mName').value.trim()||('Categoria '+String.fromCharCode(64+state.cats.length+1));
+  const raw=$('mPlayers').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  const players=[...new Set(raw)];
+  if(players.length<3){ toast('Informe pelo menos 3 jogadores'); return; }
+  if(players.length<raw.length) toast((raw.length-players.length)+' nome(s) duplicado(s) removido(s)');
+  const cat={ id:nextCatId++, name, tag:name.replace(/categoria\s*/i,'').trim().slice(0,3).toUpperCase()||('C'+nextCatId),
+    color:CAT_COLORS[(state.cats.length)%CAT_COLORS.length], format:$('mFormat').value, players };
+  state.cats.push(cat);
+  state.activeCat=cat.id;
+  closeModal();
+  render();
+  toast('Categoria criada — ajuste o ranking e sorteie a chave quando estiver pronto');
+}
+function sortearChave(id){
+  const cat=state.cats.find(c=>c.id===id); if(!cat)return;
+  const had=!!cat.matches;
+  if(had){
+    const warns=[];
+    if(cat.matches.some(m=>m.winner && !m.auto && !m.woAuto)) warns.push('resultados lançados serão perdidos');
+    const woNames=Object.keys(cat.wo||{}).map(i=>cat.drawPlayers[i]).filter(n=>cat.players.includes(n));
+    if(woNames.length) warns.push('desistentes ainda na lista voltam ao sorteio ('+woNames.join(', ')+')');
+    if(warns.length && !confirm('Re-sortear '+cat.name+'? Atenção: '+warns.join('; ')+'.')) return;
+  }
+  createMatches(cat);
+  state.activeCat=cat.id;
+  rebuildSchedule();
+  toast((had?'Chave re-sorteada: ':'Chave sorteada: ')+cat.name);
+}
+function removeCat(id){
+  const cat=state.cats.find(c=>c.id===id);
+  if(!confirm('Excluir '+cat.name+' e seus jogos?'))return;
+  state.cats=state.cats.filter(c=>c.id!==id);
+  state.schedule=state.schedule.map(c=>c.filter(k=>!k.startsWith(id+':')));
+  if(state.activeCat===id) state.activeCat=state.cats[0]?.id||null;
+  render();
+}
+
+/* ================= DEMO ================= */
+function seedDemo(){
+  const now=new Date();
+  const pad=n=>String(n).padStart(2,'0');
+  const dstr=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+  const t1=new Date(now); t1.setDate(t1.getDate()+1);
+  const t2=new Date(now); t2.setDate(t2.getDate()+2);
+  // janela de hoje começa ~4h antes de agora, para a 1ª rodada já ter acontecido
+  const startH=Math.max(6, now.getHours()-4);
+  state.config.sessions=[
+    {date:dstr(now), label:'', start:pad(startH)+':00', end:'23:30'},
+    {date:dstr(t1),  label:'', start:'08:00', end:'18:00'},
+    {date:dstr(t2),  label:'', start:'08:00', end:'18:00'},
+  ];
+  const players=['Ricardo Alexandre','Marcelo Tanaka','Fábio Correa','André Luiz','Gustavo Prado',
+    'Rafael Nunes','Bruno Sales','Eduardo Kim','Thiago Rocha','Luciano Alves',
+    'Caio Martins','Felipe Osório','Sérgio Motta','Daniel Barros','Henrique Dias',
+    'Paulo Vieira','Renato Cruz','Igor Santana','Vitor Lopes','Otávio Ramos',
+    'Márcio Fontes','Léo Cardoso','Nelson Prado','Túlio Reis','William Costa'];
+  const C={id:nextCatId++, name:'Categoria A', tag:'A', color:CAT_COLORS[0], format:'proset8', players};
+  createMatches(C); state.cats.push(C); state.activeCat=C.id;
+  rebuildSchedule();
+  // 1ª rodada concluída (favorito vence, com dois upsets e dois tiebreaks)
+  const r0=C.matches.filter(m=>m.round===0 && !m.auto);
+  const packs=[[8,6],[8,3],[8,7,[7,4]],[8,5],[8,2],[8,6],[8,7,[9,7]],[8,4],[8,1]];
+  r0.forEach((m,i)=>{
+    const favIs1 = m.p1.idx < m.p2.idx;              // menor índice = melhor ranking
+    const upset = (i===2 || i===6);
+    m.winner = (favIs1 !== upset) ? 1 : 2;
+    const p=packs[i%packs.length];
+    const set = m.winner===1 ? [p[0],p[1]] : [p[1],p[0]];
+    if(p[2]) set.push(m.winner===1 ? [p[2][0],p[2][1]] : [p[2][1],p[2][0]]);
+    m.score=[set];
+  });
+  // términos reais variados: Q1 e Q2 atrasaram; Q3 adiantou (e a oitava dela vai estourar o previsto)
+  const times=computeTimes();
+  [[0,25],[1,40],[2,-45]].forEach(([ci,delta])=>{
+    const keys=(state.schedule[ci]||[]).filter(k=>!isGap(k));
+    const lastR0=keys.filter(k=>{ const f=findByKey(k); return f && f.m.round===0; }).pop();
+    if(lastR0){
+      const f=findByKey(lastR0), t=times[lastR0];
+      if(f && t) f.m.actualEnd=Math.max(toMin(state.config.sessions[0].start)+30, Math.round(t.end + delta));
+    }
+  });
+  render();
+}
+seedDemo();
+</script>
+</body>
+</html>
