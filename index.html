@@ -140,6 +140,10 @@
   .side.loser .nm{color:var(--faint); text-decoration:line-through;}
   .bye{color:var(--faint); font-style:italic; font-size:12px;}
   .bracket-hint{color:var(--faint); font-size:12px; padding:0 18px 14px;}
+  body.player .org{display:none!important;}
+  body.player .tcard{cursor:default;}
+  .player-badge{display:none; background:var(--green-dim); border:1px solid var(--green-border); color:var(--green); font-size:11px; padding:3px 10px; border-radius:999px; white-space:nowrap;}
+  body.player .player-badge{display:inline-block;}
 
   /* ---------- Programação ---------- */
   .sched-head{display:flex; align-items:center; gap:12px; margin-bottom:14px; flex-wrap:wrap;}
@@ -287,11 +291,12 @@
       <div class="sub">Chaves, tempos e programação de quadras</div>
     </div>
     <div class="spacer"></div>
+    <span class="player-badge">👀 modo jogador · somente leitura</span>
     <div class="pill" id="summaryPill">—</div>
   </header>
   <nav class="viewnav" id="viewNav">
-    <button class="active" data-view="view-config" onclick="showView('view-config')">Configurações</button>
-    <button data-view="view-cats" onclick="showView('view-cats')">Categorias</button>
+    <button class="active org" data-view="view-config" onclick="showView('view-config')">Configurações</button>
+    <button class="org" data-view="view-cats" onclick="showView('view-cats')">Categorias</button>
     <button data-view="view-bracket" onclick="showView('view-bracket')">Chaves</button>
     <button data-view="view-sched" onclick="showView('view-sched')">Programação</button>
     <button data-view="view-overview" onclick="showView('view-overview')">Visão do evento</button>
@@ -373,7 +378,7 @@
     </div>
     <div class="card">
       <div class="bracket-wrap"><div class="bracket" id="bracket"></div></div>
-      <div class="bracket-hint">Clique em um jogo (na chave ou no card da programação) para lançar o resultado. O vencedor avança automaticamente; byes avançam sozinhos. Desistências são marcadas pelo botão W.O. no card da categoria e decidem os jogos pendentes em cascata.</div>
+      <div class="bracket-hint org">Clique em um jogo (na chave ou no card da programação) para lançar o resultado. O vencedor avança automaticamente; byes avançam sozinhos. Desistências são marcadas pelo botão W.O. no card da categoria e decidem os jogos pendentes em cascata.</div>
     </div>
   </section>
 
@@ -476,7 +481,7 @@
     <div class="card" style="margin-top:14px;">
       <div class="ov-title" style="display:flex; align-items:center; gap:10px;">🏆 Histórico de torneios
         <span style="flex:1"></span>
-        <button class="btn" onclick="archiveTournament()">Encerrar e arquivar torneio</button>
+        <button class="btn org" onclick="archiveTournament()">Encerrar e arquivar torneio</button>
       </div>
       <div id="historyList"></div>
     </div>
@@ -489,8 +494,8 @@
       <div class="legend" id="legend"></div>
       <div class="spacer" style="flex:1"></div>
       <button class="btn" onclick="openTV('sched')">📺 Modo TV</button>
-      <button class="btn" onclick="rebuildSchedule(); toast('Ordem dos jogos redistribuída')">Redistribuir ordem padrão</button>
-      <button class="btn primary" id="pubBtn" onclick="openPublish()">Publicar alterações</button>
+      <button class="btn org" onclick="rebuildSchedule(); toast('Ordem dos jogos redistribuída')">Redistribuir ordem padrão</button>
+      <button class="btn primary org" id="pubBtn" onclick="openPublish()">Publicar alterações</button>
     </div>
     <div id="courts"></div>
     <p style="color:var(--faint); font-size:12px; margin-top:10px;">
@@ -602,6 +607,8 @@ const FORMATS = {
 const CAT_COLORS = ['var(--catA)','var(--catB)','var(--catC)','var(--catD)','var(--catE)'];
 const COURT_COLORS = ['#60a5fa','#fb923c','#a78bfa','#f472b6','#22d3ee','#facc15','#f87171','#94a3b8'];
 const PXM = 1.1; // pixels por minuto na grade
+const PLAYER = new URLSearchParams(location.search).has('jogador'); // modo somente leitura
+if(PLAYER) document.body.classList.add('player');
 function courtName(ci){ return (state.config.courtNames[ci]||'').trim() || ('Quadra '+(ci+1)); }
 function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 
@@ -1651,7 +1658,7 @@ function renderSummary(){
 
 /* ================= DRAG & DROP ================= */
 let dragKey=null, didDrag=false;
-function addDnD(card){
+function addDnD(card){ if(PLAYER){ card.draggable=false; return; }
   card.addEventListener('dragstart',e=>{ dragKey=card.dataset.key; didDrag=true; card.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; });
   card.addEventListener('dragend',()=>{ dragKey=null; setTimeout(()=>didDrag=false,50); document.querySelectorAll('.dragging,.insert-before').forEach(x=>x.classList.remove('dragging','insert-before')); document.querySelectorAll('.court.dragover').forEach(x=>x.classList.remove('dragover')); });
   card.addEventListener('dragover',e=>{ e.preventDefault(); e.stopPropagation(); card.classList.add('insert-before'); });
@@ -1669,12 +1676,12 @@ function addDnD(card){
 let gid=1;
 function isGap(k){ return typeof k==='string' && k.startsWith('gap:'); }
 function gapDur(k){ return +k.split(':')[2]; }
-function rmGap(key){
+function rmGap(key){ if(PLAYER) return;
   state.schedule.forEach(c=>{ const i=c.indexOf(key); if(i>=0)c.splice(i,1); });
   renderSchedule(); renderSummary(); renderExtras(); renderBracket();
   toast('Janela removida — jogos seguintes antecipados');
 }
-function moveKey(key, toCourt, refKey, after){
+function moveKey(key, toCourt, refKey, after){ if(PLAYER) return;
   // ao sair, o jogo deixa uma janela livre no lugar (nada é antecipado automaticamente)
   state.schedule.forEach(c=>{
     const i=c.indexOf(key);
@@ -1702,7 +1709,7 @@ function moveKey(key, toCourt, refKey, after){
 
 /* ================= RESULTADO ================= */
 let resCtx=null;
-function openResult(catId, mId){
+function openResult(catId, mId){ if(PLAYER) return;
   const cat=state.cats.find(c=>c.id===catId); if(!cat)return;
   const m=cat.matches[mId];
   if(m.woAuto){ toast('Jogo decidido por W.O. — para reabrir, desfaça a desistência na aba Categorias'); return; }
@@ -1930,7 +1937,7 @@ function eventDateLabel(){
   if(!ds.length){ const n=new Date(); return String(n.getDate()).padStart(2,'0')+'/'+String(n.getMonth()+1).padStart(2,'0')+'/'+n.getFullYear(); }
   return ds.length>1 ? fmt(ds[0])+' – '+fmt(ds[ds.length-1]) : fmt(ds[0]);
 }
-function archiveTournament(){
+function archiveTournament(){ if(PLAYER) return;
   const done=[], pend=[];
   state.cats.forEach(c=>{
     const f=catFinal(c);
@@ -1943,7 +1950,7 @@ function archiveTournament(){
   saveHistory(h); renderHistory();
   toast('Torneio arquivado no histórico'+(pend.length? ' (sem final decidida: '+pend.join(', ')+')' : ''));
 }
-function rmHistory(id){ saveHistory(loadHistory().filter(x=>x.id!==id)); renderHistory(); }
+function rmHistory(id){ if(PLAYER) return; saveHistory(loadHistory().filter(x=>x.id!==id)); renderHistory(); }
 function renderHistory(){
   const el=$('historyList'); if(!el) return;
   const h=loadHistory();
@@ -1956,13 +1963,14 @@ function renderHistory(){
       <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
         <b style="font-size:13.5px;">${t.date}</b>
         <span style="flex:1"></span>
-        <button class="btn" style="padding:1px 9px; font-size:12px;" title="Remover do histórico" onclick="rmHistory(${t.id})">×</button>
+        <button class="btn org" style="padding:1px 9px; font-size:12px;" title="Remover do histórico" onclick="rmHistory(${t.id})">×</button>
       </div>
       ${t.cats.map(c=>`<div style="font-size:13px; color:var(--muted); line-height:1.8;"><b style="color:var(--txt)">${c.name}</b> &nbsp;·&nbsp; 🏆 ${c.champion} &nbsp;·&nbsp; 🥈 ${c.vice}${c.score? ' <span style="color:var(--faint)">('+c.score+')</span>' : ''}</div>`).join('')}
     </div>`).join('');
 }
 renderHistory();
 seedDemo();
+if(PLAYER) showView('view-sched');
 </script>
 </body>
 </html>
