@@ -1822,15 +1822,18 @@ function openResult(catId, mId){ if(PLAYER) return;
   labels.forEach((lb,i)=>{
     const v=(m.score&&m.score[i])||['','',null];
     const tb=v[2]||null;
+    const isMTB = cat.format==='mtb' && i===2;
+    const maxV = isMTB? 99 : ((FORMATS[cat.format].tb||[])[i]||9);
+    const dg = isMTB? 2 : 1;
     grid.insertAdjacentHTML('beforeend',
       `<span class="slabel">${lb}</span>
-       <input type="number" min="0" max="30" id="s${i}a" value="${v[0]}" oninput="checkTB(${i})">
+       <input type="number" inputmode="numeric" min="0" max="${maxV}" id="s${i}a" value="${v[0]}" oninput="this.value=this.value.replace(/\\D/g,'').slice(0,${dg});checkTB(${i})">
        <span class="x">×</span>
-       <input type="number" min="0" max="30" id="s${i}b" value="${v[1]}" oninput="checkTB(${i})">
+       <input type="number" inputmode="numeric" min="0" max="${maxV}" id="s${i}b" value="${v[1]}" oninput="this.value=this.value.replace(/\\D/g,'').slice(0,${dg});checkTB(${i})">
        <span class="slabel tbl${i}" style="display:none;">· tiebreak</span>
-       <input type="number" min="0" max="50" id="t${i}a" class="tbin tbl${i}" style="display:none;" value="${tb?tb[0]:''}">
+       <input type="number" inputmode="numeric" min="0" max="99" id="t${i}a" class="tbin tbl${i}" style="display:none;" value="${tb?tb[1-1]:''}" oninput="this.value=this.value.replace(/\\D/g,'').slice(0,2)">
        <span class="x tbl${i}" style="display:none;">×</span>
-       <input type="number" min="0" max="50" id="t${i}b" class="tbin tbl${i}" style="display:none;" value="${tb?tb[1]:''}">`);
+       <input type="number" inputmode="numeric" min="0" max="99" id="t${i}b" class="tbin tbl${i}" style="display:none;" value="${tb?tb[1]:''}" oninput="this.value=this.value.replace(/\\D/g,'').slice(0,2)">`);
   });
   labels.forEach((_,i)=>checkTB(i));
   paintWinner();
@@ -1838,6 +1841,22 @@ function openResult(catId, mId){ if(PLAYER) return;
   $('resEnd').value = m.actualEnd!=null ? fmtT(m.actualEnd) : '';
   $('resModal').classList.add('open');
 }
+/*SCOREVAL-START*/
+// Placares válidos por formato (jogo completo, sem abandono)
+function validSetScore(fmt,i,a,b){
+  const w=Math.max(a,b), l=Math.min(a,b);
+  if(w===l) return false;
+  if(fmt==='mtb' && i===2) return w<=99 && w>=10 && (w===10? l<=8 : w-l===2); // match tie-break
+  const need=(FORMATS[fmt].tb||[])[i]||0;
+  if(need===7) return (w===6&&l<=4)||(w===7&&(l===5||l===6));          // set de 6 games
+  if(need===4) return w===4&&l<=3;                                      // set curto de 4
+  if(need===8) return w===8&&l<=7;                                      // pro-set de 8
+  if(need===9) return w===9&&l<=7 || (w===9&&l===8);                    // pro-set de 9
+  return true;
+}
+function validTBDetail(a,b){ const w=Math.max(a,b), l=Math.min(a,b); return w>=7 && (w===7? l<=5 : w-l===2); }
+function setsToWin(fmt){ return (fmt==='proset8'||fmt==='proset9')? 1 : 2; }
+/*SCOREVAL-END*/
 function isTBSet(fmt,i,a,b){
   const need=(FORMATS[fmt].tb||[])[i];
   return !!need && ((a===need&&b===need-1)||(b===need&&a===need-1));
@@ -1860,24 +1879,36 @@ function saveResult(){
   const m=cat.matches[resCtx.mId];
   const labels=FORMATS[cat.format].setLabels;
   const score=[];
-  let w1=0,w2=0;
-  labels.forEach((_,i)=>{
-    const a=$('s'+i+'a').value, b=$('s'+i+'b').value;
-    if(a!=='' && b!==''){
-      const pa=+a, pb=+b;
-      const entry=[pa,pb];
-      if(isTBSet(cat.format,i,pa,pb)){
-        const ta=$('t'+i+'a').value, tv=$('t'+i+'b').value;
-        if(ta!=='' && tv!=='') entry.push([+ta,+tv]);
-      }
-      score.push(entry);
-      if(pa>pb)w1++; else if(pb>pa)w2++;
-    }
-  });
+  let w1=0,w2=0, err=null;
   const ret=$('resRet').checked;
+  labels.forEach((lb,i)=>{
+    const a=$('s'+i+'a').value, b=$('s'+i+'b').value;
+    if(a==='' && b==='') return;
+    if(a==='' || b===''){ err=err||('Complete os dois lados: '+lb); return; }
+    const pa=+a, pb=+b;
+    if(!ret && !validSetScore(cat.format,i,pa,pb)){ err=err||('Placar inexistente no formato ('+lb+' '+pa+'-'+pb+')'); return; }
+    const entry=[pa,pb];
+    if(isTBSet(cat.format,i,pa,pb)){
+      const ta=$('t'+i+'a').value, tv=$('t'+i+'b').value;
+      if(ta!=='' && tv!==''){
+        if(!ret && !validTBDetail(+ta,+tv)){ err=err||('Tiebreak do '+lb+' vai a 7 com 2 de vantagem'); return; }
+        if(!ret && ((pa>pb)!==(+ta>+tv))){ err=err||('Tiebreak do '+lb+' contradiz o vencedor do set'); return; }
+        entry.push([+ta,+tv]);
+      }
+    }
+    score.push(entry);
+    if(pa>pb)w1++; else if(pb>pa)w2++;
+  });
+  if(err){ toast(err); return; }
+  if(!ret && score.length){
+    const need=setsToWin(cat.format);
+    if(Math.max(w1,w2)!==need){ toast('Jogo incompleto ou com sets a mais — o vencedor fecha '+need+' '+(need>1?'sets':'set')+' neste formato'); return; }
+  }
   let winner=resCtx.w;
   if(ret && !winner){ toast('No abandono, selecione quem venceu clicando no nome'); return; }
-  if(!winner && score.length) winner = w1>w2?1 : w2>w1?2 : null;
+  const derived = score.length? (w1>w2?1 : w2>w1?2 : null) : null;
+  if(!ret && winner && derived && winner!==derived){ toast('O vencedor selecionado contradiz o placar'); return; }
+  if(!winner) winner = derived;
   if(!winner){ toast('Selecione o vencedor ou preencha o placar'); return; }
   m.winner=winner; m.score=score.length?score:null; m.ret=ret||null;
   const ae=$('resEnd').value;

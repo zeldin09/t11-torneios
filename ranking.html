@@ -973,19 +973,26 @@ function saveRes(){
   if(woChoice!==0){
     patch={played:true, wo:true, winner: woChoice===1? g.b : g.a, sets:'2-0', score:''};
   }else{
+    // Formato do clube: 2 sets de 6 games (tiebreak no 6 a 6) + super tiebreak se 1 a 1
+    const validSet=(a,b)=>{ const w=Math.max(a,b), l=Math.min(a,b); return (w===6&&l<=4)||(w===7&&(l===5||l===6)); };
+    const validSTB=(a,b)=>{ const w=Math.max(a,b), l=Math.min(a,b); return w<=99 && w>=10 && (w===10? l<=8 : w-l===2); };
     let wa=0, wb=0, parts=[];
-    for(let i=0;i<3;i++){
+    for(let i=0;i<2;i++){
       const a=$('sa'+i).value.trim(), b=$('sb'+i).value.trim();
-      if(a==='' && b==='') continue;
-      const lbl=i<2?(i+1)+'º set':'super tiebreak';
-      if(a==='' || b==='' || +a===+b){ toast('Placar inválido no '+lbl); return; }
-      const mx=i<2?9:99;
-      if(!/^\d+$/.test(a) || !/^\d+$/.test(b) || +a>mx || +b>mx){ toast(i<2?'Sets têm no máximo 1 dígito':'Super tiebreak tem no máximo 2 dígitos'); return; }
+      if(a===''||b===''||!/^\d+$/.test(a)||!/^\d+$/.test(b)){ toast('Preencha o '+(i+1)+'º set (os dois lados)'); return; }
+      if(!validSet(+a,+b)){ toast('Placar inexistente no '+(i+1)+'º set: sets fecham em 6 (até 6-4), 7-5 ou 7-6'); return; }
       (+a>+b)? wa++ : wb++;
-      parts.push(a+'-'+b);
+      parts.push((+a)+'-'+(+b));
     }
-    if(wa<2 && wb<2){ toast('Resultado incompleto — alguém precisa fechar 2 sets'); return; }
-    if(wa===wb){ toast('Placar sem vencedor definido'); return; }
+    const ta=$('sa2').value.trim(), tb=$('sb2').value.trim();
+    if(wa===2 || wb===2){
+      if(ta!==''||tb!==''){ toast('Jogo fechado em 2 sets — super tiebreak não se aplica'); return; }
+    }else{
+      if(ta===''||tb===''||!/^\d+$/.test(ta)||!/^\d+$/.test(tb)){ toast('Sets 1 a 1 — preencha o super tiebreak'); return; }
+      if(!validSTB(+ta,+tb)){ toast('Super tiebreak vai a 10 com 2 de vantagem (ex.: 10-8, 11-9)'); return; }
+      (+ta>+tb)? wa++ : wb++;
+      parts.push((+ta)+'-'+(+tb));
+    }
     patch={played:true, wo:false, winner: wa>wb? g.a : g.b, sets:(Math.min(wa,wb)===0?'2-0':'2-1'), score:parts.join(' ')};
   }
   ov.map[g.id]=patch; saveOv();
