@@ -281,6 +281,35 @@
   .toast{position:fixed; bottom:22px; left:50%; transform:translateX(-50%); background:var(--card2); border:1px solid var(--green-border); color:var(--txt); padding:10px 18px; border-radius:12px; font-size:13px; z-index:200; display:none;}
 
   @media (max-width:640px){ main{padding:14px;} header{padding:12px 14px;} .viewnav{padding:0;} }
+  /* ---------- Lista de jogos ---------- */
+  .gfilter{width:100%; max-width:420px; background:var(--card2); border:1px solid var(--border); border-radius:10px; color:var(--txt); padding:9px 12px; font-size:14px; font-family:inherit; margin-bottom:6px;}
+  .gcourts{display:flex; gap:6px; flex-wrap:wrap; margin:2px 0 8px;}
+  .gcourts button{background:var(--card2); border:1px solid var(--border); border-radius:999px; color:var(--muted); padding:6px 13px; font-size:12px; cursor:pointer; font-family:inherit; display:flex; align-items:center; gap:7px;}
+  .gcourts button .cdot{width:8px; height:8px; border-radius:50%; display:inline-block;}
+  .gcourts button.sel{border-color:var(--green-border); color:var(--txt); background:var(--green-dim); font-weight:600;}
+  .gday{font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--faint); margin:16px 0 6px;}
+  .gl-item{display:flex; align-items:center; gap:10px; background:var(--card2); border:1px solid var(--border); border-radius:12px; padding:10px 12px; max-width:720px;}
+  .gl-item .gt{font-variant-numeric:tabular-nums; font-size:14px; font-weight:600; min-width:44px;}
+  .gl-item .gc{width:8px; height:8px; border-radius:50%; flex-shrink:0;}
+  .gl-item .gmain{flex:1; min-width:0;}
+  .gl-item .gnames{font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .gl-item .gmeta{font-size:11px; color:var(--faint); margin-top:2px;}
+  .gl-item .gst{flex-shrink:0;}
+  .gl-item .gst .badge{margin:0;}
+  .gl-item.done{opacity:.72;}
+  .gl-item.live{border-color:var(--green-border); background:var(--green-dim);}
+  @media print{
+    body{background:#fff!important;}
+    *{color:#000!important; background:#fff!important; background-image:none!important; border-color:#999!important; box-shadow:none!important;}
+    .viewnav, .btn, .player-badge, .bracket-hint, .logo, .nowline, .nowtag, .tgap button{display:none!important;}
+    header{padding:4px 0;}
+    main > section.view{display:none!important;}
+    main > section.view.active{display:block!important;}
+    .sday-scroll, .bracket-wrap{overflow:visible!important;}
+    .side.winner .nm{font-weight:700!important;}
+    .side .chk, .side.winner .sc.w{color:#000!important;}
+    a{text-decoration:none;}
+  }
 </style>
 </head>
 <body>
@@ -297,6 +326,7 @@
     <button class="active org" data-view="view-config" onclick="showView('view-config')">Configurações</button>
     <button class="org" data-view="view-cats" onclick="showView('view-cats')">Categorias</button>
     <button data-view="view-bracket" onclick="showView('view-bracket')">Chaves</button>
+    <button data-view="view-games" onclick="showView('view-games')">Jogos</button>
     <button data-view="view-sched" onclick="showView('view-sched')">Programação</button>
     <button data-view="view-overview" onclick="showView('view-overview')">Visão do evento</button>
     <button data-view="view-help" onclick="showView('view-help')">Regras</button>
@@ -373,6 +403,7 @@
     <div class="sched-head">
       <div class="tabs" id="catTabs" style="margin-bottom:0;"></div>
       <div class="spacer" style="flex:1"></div>
+      <button class="btn" onclick="window.print()">🖨 Imprimir</button>
       <button class="btn" onclick="openTV('bracket')">📺 Modo TV</button>
     </div>
     <div class="card">
@@ -411,6 +442,7 @@
           <li><span class="n">2.3</span><b>Byes</b> são calculados sozinhos e vão para os melhores rankeados.</li>
           <li><span class="n">2.4</span>A chave só é gerada ao clicar em <b>Sortear chave</b>.</li>
           <li><span class="n">2.5</span><b>W.O. / desistência</b>: decide os jogos pendentes em cascata, sem re-sortear. Antes do sorteio, o jogador pode ser substituído.</li>
+          <li><span class="n">2.6</span><b>Disputa de 3º lugar</b>: opcional ao criar a categoria — os perdedores das semifinais se enfrentam, em jogo agendado antes da final.</li>
         </ul>
       </div>
 
@@ -420,6 +452,8 @@
           <li><span class="n">3.1</span><b>Clique em qualquer jogo</b> (na chave ou na programação) para lançar o resultado — placar por set, com tiebreak conforme o formato.</li>
           <li><span class="n">3.2</span>O <b>vencedor avança sozinho</b>; byes também.</li>
           <li><span class="n">3.3</span>Dá para registrar o <b>término real</b> do jogo e <b>desfazer</b> um resultado lançado.</li>
+          <li><span class="n">3.4</span><b>Abandono (ret.)</b>: lesão ou desistência durante o jogo — anote o placar parcial, marque "Abandono" e clique no vencedor. Aparece como "8/3 ret.".</li>
+          <li><span class="n">3.5</span><b>🖨 Imprimir</b> (aqui e na Programação): gera a chave ou a grade em fundo branco, para papel ou PDF — ideal para o mural do clube.</li>
         </ul>
       </div>
 
@@ -437,33 +471,51 @@
       </div>
 
       <div class="card help-card">
-        <h4>5. 🔭 Visão do evento</h4>
+        <h4>5. 📋 Jogos</h4>
         <ul>
-          <li><span class="n">5.1</span>Resumo do torneio por dia.</li>
-          <li><span class="n">5.2</span><b>Percurso do tenista</b>: dia e horário previsto de cada rodada de um jogador — inclusive as projeções caso avance na chave.</li>
-          <li><span class="n">5.3</span><b>Histórico de torneios</b>: ao final do evento, "Encerrar e arquivar" guarda a data, o campeão 🏆 e o vice 🥈 de cada categoria (salvo neste navegador).</li>
+          <li><span class="n">5.1</span>Lista cronológica de todos os jogos, dia a dia — feita para acompanhar pelo celular.</li>
+          <li><span class="n">5.2</span><b>Filtro por nome</b>: digite seu nome e veja só os seus jogos, com horário e quadra.</li>
+          <li><span class="n">5.3</span><b>Abas por quadra</b>: toque numa quadra para ver só os jogos dela — ou "Todas" para a lista completa.</li>
+          <li><span class="n">5.4</span>Estados em tempo real: <b style="color:var(--green)">ao vivo</b>, atrasado (+min) e concluído com placar.</li>
         </ul>
       </div>
 
       <div class="card help-card">
-        <h4>6. 📺 Modo TV</h4>
+        <h4>6. 🔭 Visão do evento</h4>
         <ul>
-          <li><span class="n">6.1</span>Telão ao vivo da <b>chave</b> ou da <b>programação</b>, para exibir no clube.</li>
-          <li><span class="n">6.2</span>Abre em janela separada (ou tela cheia, se o navegador bloquear pop-up).</li>
-          <li><span class="n">6.3</span>Sincroniza em tempo real e <b>alterna as categorias a cada 12 segundos</b>.</li>
+          <li><span class="n">6.1</span>Resumo do torneio por dia.</li>
+          <li><span class="n">6.2</span><b>Percurso do tenista</b>: dia e horário previsto de cada rodada de um jogador — inclusive as projeções caso avance na chave.</li>
+          <li><span class="n">6.3</span><b>Histórico de torneios</b>: ao final do evento, "Encerrar e arquivar" guarda a data, o campeão 🏆 e o vice 🥈 de cada categoria (salvo neste navegador).</li>
+        </ul>
+      </div>
+
+      <div class="card help-card">
+        <h4>7. 📺 Modo TV</h4>
+        <ul>
+          <li><span class="n">7.1</span>Telão ao vivo da <b>chave</b> ou da <b>programação</b>, para exibir no clube.</li>
+          <li><span class="n">7.2</span>Abre em janela separada (ou tela cheia, se o navegador bloquear pop-up).</li>
+          <li><span class="n">7.3</span>Sincroniza em tempo real e <b>alterna as categorias a cada 12 segundos</b>.</li>
         </ul>
       </div>
 
       <div class="card help-card" style="border-color:var(--green-border); background:var(--green-dim);">
-        <h4 style="color:var(--green);">7. 🧪 Versão de demonstração</h4>
+        <h4 style="color:var(--green);">8. 🧪 Versão de demonstração</h4>
         <ul>
-          <li><span class="n">7.1</span>Abre com um torneio de exemplo já em andamento.</li>
-          <li><span class="n">7.2</span><b>Nada é salvo</b> — atualizar a página (F5) reinicia tudo.</li>
-          <li><span class="n">7.3</span>Cada visitante mexe na sua própria cópia, sem afetar os demais.</li>
+          <li><span class="n">8.1</span>Abre com um torneio de exemplo já em andamento.</li>
+          <li><span class="n">8.2</span><b>Nada é salvo</b> — atualizar a página (F5) reinicia tudo.</li>
+          <li><span class="n">8.3</span>Cada visitante mexe na sua própria cópia, sem afetar os demais.</li>
         </ul>
       </div>
 
     </div>
+  </section>
+
+  <!-- JOGOS (LISTA) -->
+  <section class="view" id="view-games">
+    <div class="eyebrow">Jogos · lista completa</div>
+    <input class="gfilter" id="gFilter" maxlength="30" placeholder="🔎 Filtrar por jogador, categoria ou código…" oninput="renderGames()">
+    <div class="gcourts" id="gCourts"></div>
+    <div id="gamesList"></div>
   </section>
 
   <!-- VISÃO DO EVENTO -->
@@ -492,6 +544,7 @@
     <div class="sched-head">
       <div class="legend" id="legend"></div>
       <div class="spacer" style="flex:1"></div>
+      <button class="btn" onclick="window.print()">🖨 Imprimir</button>
       <button class="btn" onclick="openTV('sched')">📺 Modo TV</button>
       <button class="btn org" onclick="rebuildSchedule(); toast('Ordem dos jogos redistribuída')">Redistribuir ordem padrão</button>
       <button class="btn primary org" id="pubBtn" onclick="openPublish()">Publicar alterações</button>
@@ -524,6 +577,9 @@
       <label>Jogadores em ordem de ranking (um por linha, 1º = melhor)</label>
       <textarea id="mPlayers" placeholder="Ricardo Alexandre&#10;João Souza&#10;Pedro Lima&#10;..."></textarea>
     </div>
+    <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--muted); margin:2px 0 12px; cursor:pointer;">
+      <input type="checkbox" id="mThird" style="accent-color:var(--green);"> Incluir disputa de 3º lugar (perdedores das semifinais)
+    </label>
     <div class="foot">
       <button class="btn" onclick="closeModal()">Cancelar</button>
       <button class="btn primary" onclick="saveCategory()">Sortear chave</button>
@@ -542,6 +598,9 @@
     </div>
     <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:8px;">Placar (opcional — se preenchido, o vencedor é detectado pelos sets)</label>
     <div class="sets" id="setsGrid"></div>
+    <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--muted); margin:2px 0 12px; cursor:pointer;">
+      <input type="checkbox" id="resRet" style="accent-color:var(--green);"> Abandono (ret.) — lesão ou desistência durante o jogo; selecione acima quem venceu
+    </label>
     <div class="field">
       <label>Término real do jogo (opcional — os jogos seguintes da quadra recalculam a partir dele)</label>
       <input type="time" id="resEnd">
@@ -706,6 +765,10 @@ function createMatches(cat){
       matches.push({id:id++, round:r, idx:i, code:cat.tag+'-'+roundShort(count,i), p1:{type:'winner',ref:f1.id}, p2:{type:'winner',ref:f2.id}, winner:null, score:null, auto:false});
     }
   }
+  if(cat.third && cat.rounds>=2){
+    const semis = matches.filter(m=>m.round===cat.rounds-2);
+    matches.push({id:id++, round:cat.rounds-1, idx:1, third:true, code:cat.tag+'-3L', p1:{type:'loser',ref:semis[0].id}, p2:{type:'loser',ref:semis[1].id}, winner:null, score:null, auto:false});
+  }
   matches.forEach(m=>{
     if(m.round===0){
       if(m.p1.type==='bye' && m.p2.type==='player'){ m.winner=2; m.auto=true; }
@@ -718,6 +781,13 @@ function resolveSide(cat, side){
   if(side.type==='player') return {name:(cat.drawPlayers||cat.players)[side.idx], seed:side.seed, known:true};
   if(side.type==='bye') return {name:'Bye', seed:null, known:false, bye:true};
   const ref = cat.matches[side.ref];
+  if(side.type==='loser'){
+    if(ref.winner && !ref.auto){
+      const r = resolveSide(cat, ref.winner===1?ref.p2:ref.p1);
+      return r.known? r : {name:'Perd. '+ref.code, seed:null, known:false};
+    }
+    return {name:'Perd. '+ref.code, seed:null, known:false};
+  }
   if(ref.winner) return resolveSide(cat, ref.winner===1?ref.p1:ref.p2);
   return {name:'Venc. '+ref.code, seed:null, known:false};
 }
@@ -845,7 +915,7 @@ function rebuildSchedule(){
   const order=[];
   const maxR = Math.max(0,...state.cats.map(c=>c.rounds||0));
   for(let r=0;r<maxR;r++) state.cats.forEach(cat=>{
-    (cat.matches||[]).filter(m=>m.round===r && !m.auto && !m.woAuto).forEach(m=>order.push(matchKey(cat,m)));
+    (cat.matches||[]).filter(m=>m.round===r && !m.auto && !m.woAuto).sort((a,b)=>(a.third?0:1)-(b.third?0:1)).forEach(m=>order.push(matchKey(cat,m)));
   });
   const n = state.config.courts;
   state.schedule = Array.from({length:n},()=>[]);
@@ -903,7 +973,7 @@ function computeWarnings(times){
     if(times[k] && times[k].overflow) add(k,{type:'over', msg:'Não cabe nos dias configurados'});
     ['p1','p2'].forEach(s=>{
       const side=f.m[s];
-      if(side.type==='winner'){
+      if(side.type==='winner' || side.type==='loser'){
         const ref=f.cat.matches[side.ref];
         if(ref.auto || ref.winner) return;
         const rk=matchKey(f.cat,ref);
@@ -932,7 +1002,7 @@ function computeWarnings(times){
 }
 
 /* ================= RENDER ================= */
-function render(){ state.cats.forEach(applyWO); renderSessions(); renderCats(); renderTabs(); renderBracket(); renderSchedule(); renderSummary(); renderExtras(); if(typeof syncTV==='function') syncTV(); }
+function render(){ state.cats.forEach(applyWO); renderSessions(); renderCats(); renderTabs(); renderBracket(); renderSchedule(); renderSummary(); renderExtras(); if(typeof renderGames==='function') renderGames(); if(typeof syncTV==='function') syncTV(); }
 
 /* ================= VISÃO DO EVENTO ================= */
 function renderExtras(){ renderDaySummary(); renderPlayerSelect(); renderPlayerPath(); updatePubBtn(); }
@@ -1064,7 +1134,7 @@ function renderPlayerPath(){
   if(!cat.matches){ el.innerHTML='<div class="pp-empty">A chave desta categoria ainda não foi sorteada.</div>'; return; }
   const pname=(cat.drawPlayers||cat.players)[pi];
   const times=computeTimes();
-  const roundOf = mm => roundName(cat.matches.filter(x=>x.round===mm.round).length);
+  const roundOf = mm => mm.third? 'Disputa de 3º lugar' : roundName(cat.matches.filter(x=>x.round===mm.round && !x.third).length);
   let m=cat.matches.find(x=>x.round===0 && ((x.p1.type==='player'&&x.p1.idx===pi)||(x.p2.type==='player'&&x.p2.idx===pi)));
   const items=[]; let eliminated=false, firstPending=true;
   while(m && !eliminated){
@@ -1089,6 +1159,10 @@ function renderPlayerPath(){
         if:`<span class="badge if">Se avançar</span>`
       }[status];
       items.push(`<div class="pp-item ${status}"><span class="pp-when">${when}</span><div><b>${roundOf(m)}</b> · ${m.code} vs ${opp.name} ${tag}</div></div>`);
+    }
+    if(eliminated && !m.third && m.round===cat.rounds-2){
+      const th=cat.matches.find(x=>x.third);
+      if(th){ eliminated=false; m=th; continue; }
     }
     m=next;
   }
@@ -1305,7 +1379,9 @@ function renderTabs(){
 
 function scoreStr(m){
   if(m.winner && !m.score && m.woAuto) return 'W.O.';
-  return (m.score||[]).map(s=>s[0]+'/'+s[1]+(s[2]?'('+Math.min(s[2][0],s[2][1])+')':'')).join(' ');
+  const base=(m.score||[]).map(s=>s[0]+'/'+s[1]+(s[2]?'('+Math.min(s[2][0],s[2][1])+')':'')).join(' ');
+  if(m.ret) return base? base+' ret.' : 'ret.';
+  return base;
 }
 
 function renderBracket(){
@@ -1322,14 +1398,14 @@ function renderBracket(){
   for(let r=0;r<cat.rounds;r++){
     const ms = cat.matches.filter(m=>m.round===r);
     const col=document.createElement('div'); col.className='round';
-    const t=document.createElement('div'); t.className='round-title'; t.textContent=roundName(ms.length);
+    const t=document.createElement('div'); t.className='round-title'; t.textContent=roundName(ms.filter(m=>!m.third).length);
     col.appendChild(t);
     ms.forEach(m=>{
       const r1=resolveSide(cat,m.p1), r2=resolveSide(cat,m.p2);
       const playable = !m.auto && r1.known && r2.known;
       const tm = times[matchKey(cat,m)];
       const box=document.createElement('div'); box.className='match'+(playable?' playable':'');
-      box.innerHTML=`<div class="code"><span>${m.code}${m.auto?' · bye':''}</span></div>
+      box.innerHTML=`<div class="code"><span>${m.code}${m.third?' · 3º lugar':''}${m.auto?' · bye':''}</span></div>
         ${tm?`<div class="when">${m.winner?'✓ Concluído · ':''}${tm.day} · ${fmtT(tm.start)}</div>`:''}`;
       [[r1,1],[r2,2]].forEach(([rs,num])=>{
         const div=document.createElement('div');
@@ -1360,7 +1436,7 @@ function renderBracket(){
 function clearDownstream(cat, changedId){
   cat.matches.forEach(m=>{
     ['p1','p2'].forEach(s=>{
-      if(m[s].type==='winner' && m[s].ref===changedId && m.winner){
+      if((m[s].type==='winner'||m[s].type==='loser') && m[s].ref===changedId && m.winner){
         m.winner=null; m.score=null; clearDownstream(cat, m.id);
       }
     });
@@ -1553,6 +1629,10 @@ function updateNow(){
     const live=c.dataset.date===ds && +c.dataset.s<=nm && nm < +c.dataset.e && !c.classList.contains('done');
     c.classList.toggle('live', live);
   });
+  document.querySelectorAll('.gl-item').forEach(c=>{
+    const live=c.dataset.date===ds && +c.dataset.s<=nm && nm < +c.dataset.e && !c.classList.contains('done');
+    c.classList.toggle('live', live);
+  });
   // jogo estourou o previsto sem resultado: re-renderiza para esticar o bloco e empurrar a fila
   const overdue=[...document.querySelectorAll('.tcard')].some(c=>
     c.dataset.date===ds && !c.classList.contains('done') && +c.dataset.s<=nm && nm >= +c.dataset.e);
@@ -1741,6 +1821,7 @@ function openResult(catId, mId){ if(PLAYER) return;
   });
   labels.forEach((_,i)=>checkTB(i));
   paintWinner();
+  $('resRet').checked = !!m.ret;
   $('resEnd').value = m.actualEnd!=null ? fmtT(m.actualEnd) : '';
   $('resModal').classList.add('open');
 }
@@ -1780,10 +1861,12 @@ function saveResult(){
       if(pa>pb)w1++; else if(pb>pa)w2++;
     }
   });
+  const ret=$('resRet').checked;
   let winner=resCtx.w;
+  if(ret && !winner){ toast('No abandono, selecione quem venceu clicando no nome'); return; }
   if(!winner && score.length) winner = w1>w2?1 : w2>w1?2 : null;
   if(!winner){ toast('Selecione o vencedor ou preencha o placar'); return; }
-  m.winner=winner; m.score=score.length?score:null;
+  m.winner=winner; m.score=score.length?score:null; m.ret=ret||null;
   const ae=$('resEnd').value;
   m.actualEnd = ae ? toMin(ae) : null;
   clearDownstream(cat, m.id);
@@ -1793,7 +1876,7 @@ function saveResult(){
 function clearResult(){
   const cat=state.cats.find(c=>c.id===resCtx.catId);
   const m=cat.matches[resCtx.mId];
-  m.winner=null; m.score=null; m.actualEnd=null;
+  m.winner=null; m.score=null; m.actualEnd=null; m.ret=null;
   clearDownstream(cat, m.id);
   closeRes(); render();
   toast('Resultado removido');
@@ -1833,7 +1916,7 @@ function onCfgChange(){
 
 /* ================= CATEGORIAS ================= */
 function openModal(){
-  $('mName').value=''; $('mPlayers').value='';
+  $('mName').value=''; $('mPlayers').value=''; $('mThird').checked=false;
   const sel=$('mFormat'); sel.innerHTML='';
   Object.entries(FORMATS).forEach(([k,f])=>{ const o=document.createElement('option'); o.value=k; o.textContent=f.label; sel.appendChild(o); });
   $('modal').classList.add('open');
@@ -1841,12 +1924,13 @@ function openModal(){
 function closeModal(){ $('modal').classList.remove('open'); }
 function saveCategory(){
   const name=clampTxt($('mName').value,25)||('Categoria '+String.fromCharCode(64+state.cats.length+1));
+  const third=$('mThird').checked;
   const raw=$('mPlayers').value.split('\n').map(s=>clampTxt(s,30)).filter(Boolean);
   const players=[...new Set(raw)];
   if(players.length<3){ toast('Informe pelo menos 3 jogadores'); return; }
   if(players.length<raw.length) toast((raw.length-players.length)+' nome(s) duplicado(s) removido(s)');
   const cat={ id:nextCatId++, name, tag:name.replace(/categoria\s*/i,'').trim().slice(0,3).toUpperCase()||('C'+nextCatId),
-    color:CAT_COLORS[(state.cats.length)%CAT_COLORS.length], format:$('mFormat').value, players };
+    color:CAT_COLORS[(state.cats.length)%CAT_COLORS.length], format:$('mFormat').value, players, third };
   state.cats.push(cat);
   state.activeCat=cat.id;
   closeModal();
@@ -1896,7 +1980,7 @@ function seedDemo(){
     'Caio Martins','Felipe Osório','Sérgio Motta','Daniel Barros','Henrique Dias',
     'Paulo Vieira','Renato Cruz','Igor Santana','Vitor Lopes','Otávio Ramos',
     'Márcio Fontes','Léo Cardoso','Nelson Prado','Túlio Reis','William Costa'];
-  const C={id:nextCatId++, name:'Categoria A', tag:'A', color:CAT_COLORS[0], format:'proset8', players};
+  const C={id:nextCatId++, name:'Categoria A', tag:'A', color:CAT_COLORS[0], format:'proset8', players, third:true};
   createMatches(C); state.cats.push(C); state.activeCat=C.id;
   rebuildSchedule();
   // 1ª rodada concluída (favorito vence, com dois upsets e dois tiebreaks)
@@ -1923,6 +2007,52 @@ function seedDemo(){
   });
   render();
 }
+/* ================= LISTA DE JOGOS ================= */
+let gCourtSel=null;
+function pickGCourt(ci){ gCourtSel=(ci===gCourtSel||ci===null)?null:ci; if(ci===null)gCourtSel=null; renderGames(); }
+function renderGames(){
+  const el=$('gamesList'); if(!el) return;
+  const times=computeTimes();
+  const q=($('gFilter')?$('gFilter').value:'').toLowerCase().trim();
+  const courtOf={}; state.schedule.forEach((c,ci)=>c.forEach(k=>courtOf[k]=ci));
+  if(gCourtSel!=null && gCourtSel>=state.config.courts) gCourtSel=null;
+  const gc=$('gCourts');
+  if(gc){
+    const counts=state.schedule.map(c=>c.filter(k=>!isGap(k)).length);
+    const total=counts.reduce((a,b)=>a+b,0);
+    let chips=`<button class="${gCourtSel==null?'sel':''}" onclick="pickGCourt(null)">Todas (${total})</button>`;
+    for(let ci=0;ci<state.config.courts;ci++)
+      chips+=`<button class="${gCourtSel===ci?'sel':''}" onclick="pickGCourt(${ci})"><span class="cdot" style="background:${COURT_COLORS[ci%COURT_COLORS.length]}"></span>${courtName(ci)} (${counts[ci]||0})</button>`;
+    gc.innerHTML=chips;
+  }
+  const now=new Date(); const nm=now.getHours()*60+now.getMinutes(); const ds=todayStr();
+  const items=[];
+  state.schedule.flat().filter(k=>!isGap(k)).forEach(k=>{ const f=findByKey(k), t=times[k]; if(f&&t) items.push({f,t,k}); });
+  items.sort((a,b)=>a.t.abs-b.t.abs);
+  let curDay=null, html='', shown=0;
+  items.forEach(({f,t,k})=>{
+    const r1=resolveSide(f.cat,f.m.p1), r2=resolveSide(f.cat,f.m.p2);
+    if(gCourtSel!=null && courtOf[k]!==gCourtSel) return;
+    if(q && !(r1.name.toLowerCase().includes(q)||r2.name.toLowerCase().includes(q)||f.m.code.toLowerCase().includes(q)||f.cat.name.toLowerCase().includes(q))) return;
+    shown++;
+    if(t.day!==curDay){ curDay=t.day; html+=`<div class="gday">${t.day}</div>`; }
+    const sess=state.config.sessions[t.si]||{}; const date=sess.date||'';
+    const done=!!f.m.winner, w=f.m.winner;
+    const live=!done && date===ds && t.start<=nm && nm<t.end;
+    const n1=w===1?`<b style="color:var(--green)">${r1.name}</b>`:r1.name;
+    const n2=w===2?`<b style="color:var(--green)">${r2.name}</b>`:r2.name;
+    const st= done? `<span class="badge ok">✓ ${scoreStr(f.m)||'ok'}</span>` : t.late? `<span class="badge over">+${t.lateMin} min</span>` : live? `<span class="badge next">ao vivo</span>` : '';
+    const ci=courtOf[k];
+    html+=`<div class="gl-item${done?' done':''}${live?' live':''}" data-date="${date}" data-s="${t.start}" data-e="${t.end}">
+      <span class="gt">${fmtT(t.start)}</span>
+      <span class="gc" style="background:${COURT_COLORS[ci%COURT_COLORS.length]}"></span>
+      <span class="gmain"><span class="gnames">${n1} × ${n2}</span><div class="gmeta">${f.cat.name} · ${f.m.code}${f.m.third?' · 3º lugar':''} · ${courtName(ci)}</div></span>
+      <span class="gst">${st}</span>
+    </div>`;
+  });
+  el.innerHTML = shown? html : '<div class="pp-empty">'+((q||gCourtSel!=null)?'Nenhum jogo encontrado com esse filtro.':'Sorteie uma chave para gerar os jogos.')+'</div>';
+}
+
 /* ================= HISTÓRICO DE TORNEIOS ================= */
 function loadHistory(){ try{ return JSON.parse(localStorage.getItem('t11_history')||'[]'); }catch(e){ return window.__histMem||[]; } }
 function saveHistory(h){ try{ localStorage.setItem('t11_history', JSON.stringify(h)); }catch(e){ window.__histMem=h; } }
@@ -1973,7 +2103,7 @@ function renderHistory(){
 }
 renderHistory();
 seedDemo();
-if(PLAYER) showView('view-sched');
+if(PLAYER) showView(window.innerWidth<=700 ? 'view-games' : 'view-sched');
 </script>
 </body>
 </html>
