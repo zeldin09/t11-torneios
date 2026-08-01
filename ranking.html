@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tennis T11 — Ranking</title>
+<style>
+  :root{
+    --bg:#0a0a0b; --card:#151517; --card2:#1c1c20; --border:#27272c;
+    --txt:#f4f4f5; --muted:#8b8b93; --faint:#74747d;
+    --green:#4ade80; --green-dim:#14351f; --green-border:#1f6b3a;
+    --warn:#fbbf24; --danger:#f87171;
+    --r:14px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--bg); color:var(--txt); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:14px; line-height:1.45; padding-bottom:80px;}
+  .topbar{position:sticky; top:0; z-index:50; background:rgba(10,10,11,.92); backdrop-filter:blur(10px); border-bottom:1px solid var(--border);}
+  header{max-width:1280px; margin:0 auto; padding:14px 24px 10px; display:flex; align-items:center; gap:14px; flex-wrap:wrap;}
+  header .logo{width:34px; height:34px; border-radius:10px; background:#000; border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:16px; overflow:hidden;}
+  .logo img{width:100%; height:100%; object-fit:cover; display:block;}
+  header h1{font-size:16px; font-weight:600;}
+  header .spacer{flex:1;}
+  .pill{background:var(--card2); border:1px solid var(--border); border-radius:999px; padding:5px 12px; font-size:12px; color:var(--muted);}
+  .pill b{color:var(--txt);}
+  main{max-width:1280px; margin:0 auto; padding:24px;}
+  .eyebrow{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--faint); margin-bottom:8px;}
+  section{margin-bottom:34px;}
+  .viewnav{display:flex; gap:2px; max-width:1280px; margin:0 auto; padding:0 10px; overflow-x:auto; scrollbar-width:none;}
+  .viewnav::-webkit-scrollbar{display:none;}
+  .viewnav button{background:transparent; border:none; border-bottom:2px solid transparent; color:var(--muted); padding:10px 14px 12px; font-size:14px; cursor:pointer; font-family:inherit; white-space:nowrap;}
+  .viewnav button:hover{color:var(--txt);}
+  .viewnav button.active{color:var(--green); border-bottom-color:var(--green); font-weight:600;}
+  main > section.view{display:none;}
+  main > section.view.active{display:block;}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:var(--r);}
+  .btn{background:var(--card2); border:1px solid var(--border); border-radius:10px; color:var(--txt); padding:7px 12px; font-size:13px; cursor:pointer; font-family:inherit;}
+  .btn:hover{border-color:var(--green-border);}
+  .btn.primary{background:var(--green-dim); border-color:var(--green-border); color:var(--green); font-weight:600;}
+  .btn.primary:hover{filter:brightness(1.2);}
+  .btn.danger:hover{border-color:var(--danger); color:var(--danger);}
+  .toast{position:fixed; bottom:22px; left:50%; transform:translateX(-50%); background:var(--card2); border:1px solid var(--green-border); color:var(--txt); padding:10px 18px; border-radius:12px; font-size:13px; z-index:200; display:none;}
+  .tabs{display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;}
+  .tab{border:1px solid var(--border); background:var(--card); border-radius:999px; padding:7px 16px; cursor:pointer; color:var(--muted); font-size:13px; font-family:inherit;}
+  .tab.active{color:var(--txt); border-color:var(--green-border); background:var(--green-dim);}
+
+  /* ---------- Ranking ---------- */
+  .win-note{font-size:12px; color:var(--muted); margin-bottom:12px;}
+  .win-note b{color:var(--txt);}
+  .rank-wrap{overflow-x:auto;}
+  table.rank{width:100%; border-collapse:collapse; font-size:13px; min-width:820px;}
+  .rank th{font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--faint); text-align:right; padding:11px 12px; border-bottom:1px solid var(--border); font-weight:600; white-space:nowrap;}
+  .rank th.l, .rank td.l{text-align:left;}
+  .rank td{padding:9px 12px; border-bottom:1px solid var(--border); text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;}
+  .rank tbody tr:last-child td{border-bottom:none;}
+  .rank tbody tr.prow{cursor:pointer;}
+  .rank tbody tr.prow:hover{background:var(--card2);}
+  .pos{color:var(--faint); font-weight:700; width:34px;}
+  tr.top1 .pos{color:var(--green);}
+  .mov{font-size:11px; width:40px;}
+  .mov .up{color:var(--green);} .mov .dn{color:var(--danger);} .mov .eq{color:var(--faint);}
+  .pname-cell{font-weight:600;}
+  .ptsmain{font-weight:700; font-size:14px;}
+  .subcol{color:var(--muted);}
+  .delta{font-size:11px; border-radius:6px; padding:1px 6px; border:1px solid; margin-left:6px;}
+  .delta.up{color:var(--green); background:var(--green-dim); border-color:var(--green-border);}
+  .delta.dn{color:var(--danger); background:rgba(248,113,113,.08); border-color:rgba(248,113,113,.3);}
+  .delta.eq{color:var(--faint); background:transparent; border-color:var(--border);}
+  .btag{font-size:11px; letter-spacing:.06em; border-radius:6px; padding:1px 5px; border:1px solid; white-space:nowrap;}
+  .btag.ina{color:var(--danger); background:rgba(248,113,113,.1); border-color:rgba(248,113,113,.3);}
+  .btag.def{color:var(--warn); background:rgba(251,191,36,.08); border-color:rgba(251,191,36,.3);}
+  tr.inactive td{opacity:.4;}
+  tr.detail-row td{background:var(--card2); padding:14px 16px; white-space:normal;}
+  .det-grid{display:flex; gap:26px; flex-wrap:wrap; align-items:flex-start;}
+  .det-title{font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--faint); margin-bottom:8px;}
+  .bars{display:flex; gap:5px; align-items:flex-end; padding-top:2px;}
+  .barcol{display:flex; flex-direction:column; align-items:center; gap:4px;}
+  .barcol .bv{font-size:11px; color:var(--muted); font-variant-numeric:tabular-nums;}
+  .barcol .bar{width:20px; background:#3a3a41; border-radius:4px 4px 0 0; min-height:2px;}
+  .barcol.def .bar{background:var(--warn); opacity:.75;}
+  .barcol.live .bar{background:transparent; border:1px dashed var(--green-border); border-bottom:none;}
+  .barcol.live .bar{background:rgba(74,222,128,.18);}
+  .barcol .bl{font-size:11px; color:var(--faint); white-space:nowrap;}
+  .barcol.def .bl, .barcol.def .bv{color:var(--warn);}
+  .barcol.live .bl, .barcol.live .bv{color:var(--green);}
+  .det-games{min-width:260px; font-size:12px;}
+  .det-games li{list-style:none; padding:3px 0; color:var(--muted);}
+  .det-games b{color:var(--txt);}
+  .det-games .gp{color:var(--green); font-variant-numeric:tabular-nums;}
+
+  /* ---------- Jogos ---------- */
+  .glist{padding:6px 0;}
+  .grow{display:flex; align-items:center; gap:10px; padding:9px 16px; border-bottom:1px solid var(--border); font-size:13px; flex-wrap:wrap;}
+  .grow:last-child{border-bottom:none;}
+  .grow .gday{color:var(--faint); font-size:11px; width:52px; font-variant-numeric:tabular-nums;}
+  .grow .gvs{flex:1; min-width:220px;}
+  .grow .gvs .w{color:var(--green); font-weight:600;}
+  .grow .gvs .rk{color:var(--faint); font-size:11px; font-variant-numeric:tabular-nums;}
+  .grow .gres{font-size:11px; letter-spacing:.06em; color:var(--muted); border:1px solid var(--border); border-radius:6px; padding:1px 7px; white-space:nowrap;}
+  .grow .gres.wo{color:var(--warn); border-color:rgba(251,191,36,.35);}
+  .grow .gres.pend{color:var(--faint); border-style:dashed;}
+  .grow .gpts{font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; white-space:nowrap;}
+  .grow .gpts b{color:var(--txt);}
+  .grow .gskip{font-size:11px; color:var(--faint); border:1px dashed var(--border); border-radius:6px; padding:1px 6px;}
+  .pend-box{margin-top:14px; padding:14px 16px;}
+  .pend-box .pi{display:inline-block; margin:3px 10px 3px 0; font-size:12px; color:var(--muted);}
+  .pend-box .pi b{color:var(--warn);}
+
+  /* ---------- Config ---------- */
+  #configCard{padding:0; max-width:860px;}
+  .cfg-sec{padding:18px 20px;}
+  .cfg-sec + .cfg-sec{border-top:1px solid var(--border);}
+  .cfg-title{font-size:13px; font-weight:600; margin-bottom:2px;}
+  .cfg-sub{font-size:12px; color:var(--muted); margin-bottom:14px;}
+  .cfg-row{display:flex; flex-wrap:wrap; gap:14px 22px; align-items:flex-start;}
+  .cfg-row > div{width:150px;}
+  .cfg label{display:block; font-size:11px; color:var(--muted); margin-bottom:5px;}
+  .cfg input,.cfg select{width:100%; background:var(--card2); border:1px solid var(--border); border-radius:10px; color:var(--txt); padding:8px 10px; font-size:14px; font-family:inherit;}
+  .cfg input:focus,.cfg select:focus{outline:none; border-color:var(--green-border);}
+  .cfg .hint{font-size:11px; color:var(--faint); margin-top:4px;}
+  .cfg-row > div.wide{width:240px;}
+
+  /* ---------- Regras (mesmo padrão do torneio) ---------- */
+  .help-grid{display:flex; flex-direction:column; gap:14px; max-width:860px;}
+  .help-card{padding:16px 18px;}
+  .help-card h4{margin:0 0 10px; font-size:14px; font-weight:700;}
+  .help-card ul{margin:0; padding-left:0; list-style:none; font-size:13px; color:var(--muted); line-height:1.55; display:flex; flex-direction:column; gap:6px;}
+  .help-card .n{color:var(--green); font-variant-numeric:tabular-nums; font-weight:600; margin-right:7px;}
+  .help-card b{color:var(--txt); font-weight:600;}
+
+  @media (max-width:640px){ main{padding:14px;} header{padding:12px 14px;} .viewnav{padding:0;} .cfg-row > div{width:calc(50% - 11px);} }
+  /* fade dinâmico: só quando há abas escondidas naquele lado */
+  .viewnav.fade-r{mask-image:linear-gradient(to right,#000 calc(100% - 34px),transparent); -webkit-mask-image:linear-gradient(to right,#000 calc(100% - 34px),transparent);}
+  .viewnav.fade-l{mask-image:linear-gradient(to left,#000 calc(100% - 34px),transparent); -webkit-mask-image:linear-gradient(to left,#000 calc(100% - 34px),transparent);}
+  .viewnav.fade-l.fade-r{mask-image:linear-gradient(to right,transparent,#000 34px,#000 calc(100% - 34px),transparent); -webkit-mask-image:linear-gradient(to right,transparent,#000 34px,#000 calc(100% - 34px),transparent);}
+  button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focus-visible{outline:2px solid var(--green); outline-offset:2px;}
+
+  /* ---------- Modal de resultado ---------- */
+  .overlay{position:fixed; inset:0; background:rgba(0,0,0,.65); display:none; align-items:flex-start; justify-content:center; z-index:100; padding:40px 16px; overflow-y:auto;}
+  .overlay.open{display:flex;}
+  .modal{background:var(--card); border:1px solid var(--border); border-radius:14px; width:100%; max-width:420px; padding:22px;}
+  .modal h3{font-size:16px; margin-bottom:4px;}
+  .modal .msub{color:var(--muted); font-size:12px; margin-bottom:16px;}
+  .modal .foot{display:flex; justify-content:flex-end; gap:8px; margin-top:14px; flex-wrap:wrap;}
+  .wsel{display:flex; flex-direction:column; gap:8px; margin-bottom:16px;}
+  .wopt{display:flex; align-items:center; gap:10px; background:var(--card2); border:1px solid var(--border); border-radius:10px; padding:10px 12px; cursor:pointer; font-size:13px;}
+  .wopt:hover{border-color:var(--green-border);}
+  .wopt.sel{border-color:var(--green-border); background:var(--green-dim); color:var(--green); font-weight:600;}
+  .sets{display:grid; grid-template-columns:70px 1fr 16px 1fr; gap:8px 10px; align-items:center;}
+  .sets.off{opacity:.35; pointer-events:none;}
+  .sets .slabel{font-size:11px; color:var(--muted);}
+  .sets .shead{font-size:11px; color:var(--faint); text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .sets input{background:var(--card2); border:1px solid var(--border); border-radius:10px; color:var(--txt); padding:7px 8px; font-size:16px; text-align:center; width:100%; font-family:inherit;}
+  .sets input:focus{outline:none; border-color:var(--green-border);}
+  .sets .x{color:var(--faint); text-align:center;}
+  .grow .bsm{margin-left:auto; padding:4px 10px; font-size:12px;}
+  .btag.new{color:var(--green); background:var(--green-dim); border-color:var(--green-border);}
+  .sp-item{display:inline-flex; align-items:center; gap:8px; margin:4px 16px 4px 0; color:var(--muted); font-size:13px;}
+  .sp-item img{height:30px; border-radius:6px; background:#fff; padding:2px;}
+  .sp-chip{display:inline-flex; align-items:center; gap:8px; background:var(--card2); border:1px solid var(--border); border-radius:10px; padding:5px 10px; margin:0 8px 8px 0; font-size:13px;}
+  .sp-chip img{height:22px; border-radius:4px; background:#fff; padding:1px;}
+  .sp-chip button{background:none; border:none; color:var(--faint); cursor:pointer; font-size:14px;}
+  .sp-chip button:hover{color:var(--danger);}
+  .prow-p{display:flex; align-items:center; gap:10px; padding:9px 16px; border-bottom:1px solid var(--border); font-size:13px; flex-wrap:wrap;}
+  .prow-p:last-child{border-bottom:none;}
+  .prow-p .pn{font-weight:600; min-width:170px;}
+  .prow-p .pm{color:var(--muted); font-size:12px;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <header>
+    <div class="logo">🎾</div>
+    <h1>Tennis T11 · Ranking</h1>
+    <div class="pill" id="summaryPill">—</div>
+    <div class="spacer"></div>
+    <a class="btn" href="index.html" style="text-decoration:none;">🏆 Torneios</a>
+  </header>
+  <nav class="viewnav" id="viewNav">
+    <button class="active" data-view="view-rank" onclick="showView('view-rank')">Ranking</button>
+    <button data-view="view-games" onclick="showView('view-games')">Jogos do mês</button>
+    <button data-view="view-players" onclick="showView('view-players')">Jogadores</button>
+    <button data-view="view-config" onclick="showView('view-config')">Configurações</button>
+    <button data-view="view-help" onclick="showView('view-help')">Regras</button>
+  </nav>
+</div>
+
+<main>
+
+  <!-- RANKING -->
+  <section class="view active" id="view-rank">
+    <div class="eyebrow">Ranking mensal · janela rolante de 12 meses</div>
+    <div class="tabs" id="rankModeTabs"></div>
+    <div class="win-note" id="winNote"></div>
+    <div class="card rank-wrap">
+      <table class="rank">
+        <thead id="rankHead"></thead>
+        <tbody id="rankBody"></tbody>
+      </table>
+    </div>
+    <div class="card" id="sponsorStrip" style="margin-top:14px; padding:12px 16px; display:none;"></div>
+  </section>
+
+  <!-- JOGOS -->
+  <section class="view" id="view-games">
+    <div class="eyebrow">Jogos por mês · pontos conforme a regra vigente</div>
+    <div class="tabs" id="monthTabs"></div>
+    <div class="card glist" id="gamesList"></div>
+    <div class="card pend-box" id="pendBox" style="display:none;"></div>
+  </section>
+
+  <!-- JOGADORES -->
+  <section class="view" id="view-players">
+    <div class="eyebrow">Inscritos · sem limite — entram a qualquer momento, sem pontos, e jogam a partir do próximo sorteio</div>
+    <div class="card" style="max-width:860px;">
+      <div class="cfg-sec cfg">
+        <div class="cfg-title">Inscrever jogador</div>
+        <div class="cfg-sub" id="joinNote"></div>
+        <div style="display:flex; gap:8px; max-width:440px;">
+          <input id="npName" maxlength="30" placeholder="Nome do jogador" style="flex:1; background:var(--card2); border:1px solid var(--border); border-radius:10px; color:var(--txt); padding:8px 10px; font-size:14px; font-family:inherit;">
+          <button class="btn primary" onclick="addPlayer()">Inscrever</button>
+        </div>
+      </div>
+      <div class="cfg-sec" id="playersList" style="padding:6px 0;"></div>
+    </div>
+  </section>
+
+  <!-- CONFIG -->
+  <section class="view" id="view-config">
+    <div class="eyebrow">Regras do ranking — tudo recalcula na hora</div>
+    <div class="card" id="configCard">
+
+      <div class="cfg-sec cfg">
+        <div class="cfg-title">Temporada e identidade</div>
+        <div class="cfg-sub">O título aparece no cabeçalho. Meses anteriores ao início não contam para o ranking. Patrocinadores aparecem na faixa de apoio abaixo da classificação (e no topo da futura versão do jogador).</div>
+        <div class="cfg-row" id="brandFields"></div>
+        <div id="sponsorList" style="margin-top:12px;"></div>
+        <div style="display:flex; gap:8px; margin-top:10px; align-items:center; flex-wrap:wrap;">
+          <input id="spName" maxlength="24" placeholder="Nome do patrocinador" style="width:200px; background:var(--card2); border:1px solid var(--border); border-radius:10px; color:var(--txt); padding:8px 10px; font-size:14px; font-family:inherit;">
+          <label class="btn" style="cursor:pointer;">Logo… <input type="file" accept="image/*" style="display:none" onchange="spPick(this)"></label>
+          <span id="spPicked" class="hint"></span>
+          <button class="btn primary" onclick="addSponsor()">Adicionar</button>
+        </div>
+      </div>
+
+      <div class="cfg-sec cfg">
+        <div class="cfg-title">1 · Pontuação por jogo</div>
+        <div class="cfg-sub">Como cada resultado vira pontos.</div>
+        <div class="cfg-row" id="rowModel"></div>
+      </div>
+
+      <div class="cfg-sec cfg">
+        <div class="cfg-title">2 · Jogos além dos 2 obrigatórios</div>
+        <div class="cfg-sub">O que acontece quando o jogador faz mais de 2 jogos no mês.</div>
+        <div class="cfg-row" id="rowExtras"></div>
+      </div>
+
+      <div class="cfg-sec cfg">
+        <div class="cfg-title">3 · Jogo obrigatório não realizado</div>
+        <div class="cfg-sub">Consequência de fechar o mês com menos de 2 jogos.</div>
+        <div class="cfg-row" id="rowMissed"></div>
+      </div>
+
+      <div class="cfg-sec cfg">
+        <div class="cfg-title">4 · Sorteio dos confrontos</div>
+        <div class="cfg-sub">Adversários saem de uma faixa em torno da posição no ranking — o 1º obrigatório tende a vir de cima, o 2º de baixo. Atenção: faixa muito estreita com janela longa de não-repetição pode forçar repetições (poucos adversários possíveis). Alterar refaz o sorteio da demonstração.</div>
+        <div class="cfg-row" id="drawFields"></div>
+      </div>
+
+      <div class="cfg-sec cfg">
+        <div class="cfg-title">Dados de demonstração</div>
+        <div class="cfg-sub">16 jogadores fictícios, 16 meses de histórico gerado, mês corrente em andamento.</div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn" onclick="reseed()">↻ Gerar novo histórico</button>
+          <button class="btn danger" onclick="resetCfg()">Restaurar regras padrão</button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- REGRAS -->
+  <section class="view" id="view-help">
+    <div class="eyebrow">Regras · como o ranking funciona (gerado pelas configurações)</div>
+    <div class="help-grid" id="rulesBody"></div>
+  </section>
+
+</main>
+
+<div class="overlay" id="resOverlay">
+  <div class="modal">
+    <h3 id="resTitle">Lançar resultado</h3>
+    <div class="msub" id="resSub"></div>
+    <div class="wsel" id="woSel"></div>
+    <div class="sets" id="setsGrid"></div>
+    <div class="foot">
+      <button class="btn" onclick="closeRes()">Cancelar</button>
+      <button class="btn danger" id="resClear" onclick="clearRes()">Remover resultado</button>
+      <button class="btn primary" onclick="saveRes()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ base ============ */
+const $=id=>document.getElementById(id);
+const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const LOGO='data:image/jpeg;base64,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';
+document.querySelectorAll('.logo').forEach(el=>{ el.textContent=''; el.innerHTML='<img src="'+LOGO+'" alt="Tamboré 11">'; });
+let toastT=null;
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.style.display='block'; clearTimeout(toastT); toastT=setTimeout(()=>t.style.display='none',2600); }
+function showView(id){
+  document.querySelectorAll('main > section.view').forEach(s=>s.classList.toggle('active', s.id===id));
+  document.querySelectorAll('#viewNav button').forEach(b=>b.classList.toggle('active', b.dataset.view===id));
+}
+
+/*ENGINE-START*/
+/* ============ util ============ */
+const MN=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+function kOf(y,m){ return y*12+m; }
+function yOf(k){ return Math.floor(k/12); }
+function mOf(k){ return k%12; }
+function kLabel(k){ return MN[mOf(k)]+'/'+String(yOf(k)).slice(2); }
+function kLabelFull(k){ const F=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']; return F[mOf(k)]+' de '+yOf(k); }
+
+/* ============ estado ============ */
+const NAMES=['André Sposito','Bruno Leme','Caio Martins','Daniel Fuchs','Eduardo Prado','Felipe Arruda','Gustavo Nishimura','Henrique Vaz','Igor Bataglia','João Pedro Sales','Leandro Ostrowski','Marcelo Tanaka','Otávio Ferraz','Paulo Roberto Dias','Rafael Quintela','Sérgio Camargo'];
+const DEF_CFG={
+  model:'fixed',                       // fixed | bonus | sets
+  pts:{win:10, lossPlayed:4, lossWO:0, woWin:10, bonus:5, v20:12, v21:10, d12:6, d02:4},
+  extras:'best2',                      // only2 | best2 | cap
+  cap:30,
+  missed:'zero',                       // zero | penalty | inactive
+  penalty:5,
+  band:7,                              // sorteio: distância máx. no ranking (valor usado no clube)
+  norepeat:2,                          // sorteio: meses sem repetir adversário
+  startYm:'2025-02',                   // início da temporada — meses antes não contam
+  title:'Tennis T11 · Ranking',
+  sponsors:[],                         // {name, img?}
+  seed:11
+};
+let cfg=JSON.parse(JSON.stringify(DEF_CFG));
+(function(){ const st=load(); if(st){ const pts=Object.assign({},DEF_CFG.pts,st.pts||{}); Object.assign(cfg,st); cfg.pts=pts; } })();
+function load(){ try{ const s=localStorage.getItem('t11_ranking_cfg_v1'); return s? JSON.parse(s):null; }catch(e){ return null; } }
+function save(){ try{ localStorage.setItem('t11_ranking_cfg_v1', JSON.stringify(cfg)); }catch(e){} }
+
+let players=[], games=[], CURK=0, TODAY=1, START_K=0;
+function parseYm(v){ const [y,m]=String(v).split('-').map(Number); return kOf(y,(m||1)-1); }
+function loadPlayersX(){ try{ return JSON.parse(localStorage.getItem('t11_ranking_players_v1'))||[]; }catch(e){ return []; } }
+function savePlayersX(){ try{ localStorage.setItem('t11_ranking_players_v1', JSON.stringify(playersX)); }catch(e){} }
+let playersX=loadPlayersX(); // inscritos ao longo do ano: {name, joinYm}
+
+/* ============ geração de demo · sorteio por faixa ============ */
+function pairKey(a,b){ return a<b? a+'-'+b : b+'-'+a; }
+function genData(){
+  const rnd=mulberry32(cfg.seed);
+  const now=new Date(); CURK=kOf(now.getFullYear(), now.getMonth()); TODAY=now.getDate();
+  START_K=Math.min(parseYm(cfg.startYm), CURK);
+  const span=CURK-START_K;
+  players=NAMES.map((n,i)=>({id:i, name:n, str:0.2+0.75*rnd(), joinK:START_K}));
+  // demonstração da regra de entrada: dois jogadores inscritos ao longo da temporada
+  if(span>=6){ players[14].joinK=START_K+Math.floor(span*0.55); players[15].joinK=CURK-1; }
+  const rnd2=mulberry32(cfg.seed^0x9e37);
+  for(const px of playersX){ players.push({id:players.length, name:px.name, str:0.35+0.4*rnd2(), joinK:Math.max(parseYm(px.joinYm), START_K), custom:true}); }
+  games=[]; let gid=0;
+  const startK=START_K;
+  const intM={};   // pontos internos (regra fixa) só para ordenar o sorteio — independe da regra exibida
+  const faced={};  // k -> Set de pares que se enfrentaram
+  const intSum=(p,k)=>{ let s=0; for(let x=k-12;x<=k-1;x++) s+=(intM[x]?.[p]||0); return s; };
+  for(let k=startK; k<=CURK; k++){
+    // ranking vigente na hora do sorteio
+    const order=players.filter(p=>p.joinK<=k).map(p=>p.id).sort((a,b)=> intSum(b,k)-intSum(a,k) || players[b].str-players[a].str);
+    const pos=new Map(); order.forEach((p,i)=>pos.set(p,i+1));
+    const part=players.map(p=>{ if(p.joinK>k) return 0; const r=rnd(); return r<0.05?0 : r<0.16?1 : 2; });
+    const avoid=new Set();
+    for(let x=k-cfg.norepeat; x<=k-1; x++) (faced[x]||new Set()).forEach(pk=>avoid.add(pk));
+    faced[k]=new Set();
+    const monthGames=[];
+    function addGame(a,b,round){
+      const day = round===0? 2+Math.floor(rnd()*10) : round===1? 12+Math.floor(rnd()*12) : 24+Math.floor(rnd()*5);
+      const played = k!==CURK || day<=TODAY;
+      let winner=null, wo=false, sets=null;
+      if(played){
+        wo = rnd()<0.07;
+        const sa=players[a].str, sb=players[b].str;
+        const pA = 1/(1+Math.pow(10,(sb-sa)*2.6));
+        winner = rnd()<pA? a : b;
+        sets = wo? '2-0' : (rnd() < 0.45+Math.min(.4,Math.abs(sa-sb)) ? '2-0' : '2-1');
+      }
+      const g={id:gid++, k, day, a, b, winner, wo, sets, played, pa:pos.get(a), pb:pos.get(b)};
+      games.push(g); monthGames.push(g); faced[k].add(pairKey(a,b));
+    }
+    // Sorteio de uma rodada: 40 tentativas aleatórias, vence a de menor penalidade.
+    // Penalidades: par fora da faixa (grave), repetir adversário recente (média),
+    // mesmo lado do 1º jogo quando há preferência (leve).
+    const BAND=Math.max(1,cfg.band|0);
+    function tryMatch(pool, extraAvoid, dir1){
+      const un=new Set(pool);
+      const shuf=pool.slice();
+      for(let i=shuf.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [shuf[i],shuf[j]]=[shuf[j],shuf[i]]; }
+      const pairs=[];
+      for(const a of shuf){
+        if(!un.has(a)) continue;
+        un.delete(a);
+        if(!un.size) break;
+        const rem=[...un], pa=pos.get(a);
+        const inB=rem.filter(b=>Math.abs(pos.get(b)-pa)<=BAND);
+        let c=inB.filter(b=>!avoid.has(pairKey(a,b)) && !extraAvoid.has(pairKey(a,b)));
+        if(dir1 && c.length){ const pref=-(dir1.get(a)||0); const cd=c.filter(b=>Math.sign(pos.get(b)-pa)===pref); if(cd.length) c=cd; }
+        if(!c.length) c=inB.filter(b=>!extraAvoid.has(pairKey(a,b)));
+        if(!c.length) c=rem.filter(b=>!extraAvoid.has(pairKey(a,b)));
+        if(!c.length) c=rem;
+        const b=c[Math.floor(rnd()*c.length)];
+        un.delete(b); pairs.push([a,b]);
+      }
+      let pen=0;
+      for(const [a,b] of pairs){
+        const d=Math.abs(pos.get(a)-pos.get(b));
+        if(d>BAND) pen += 10+(d-BAND);
+        if(avoid.has(pairKey(a,b))) pen += 6;
+        if(dir1){
+          const s=Math.sign(pos.get(b)-pos.get(a));
+          if(dir1.get(a)===s) pen += 1;
+          if(dir1.get(b)===-s) pen += 1;
+        }
+      }
+      return {pairs, pen};
+    }
+    function drawRound(pool, extraAvoid, dir1, round){
+      if(pool.length<2) return;
+      let best=null;
+      for(let t=0;t<40;t++){
+        const r=tryMatch(pool, extraAvoid, dir1);
+        if(!best || r.pen<best.pen) best=r;
+        if(best.pen===0) break;
+      }
+      for(const [a,b] of best.pairs) addGame(a,b,round);
+    }
+    // 1º obrigatório: pareamento dentro da faixa
+    drawRound(order.filter(p=>part[p]>=1), new Set(), null, 0);
+    const r1=new Set(monthGames.map(g=>pairKey(g.a,g.b)));
+    const dir1=new Map();
+    for(const g of monthGames){ dir1.set(g.a, Math.sign(g.pb-g.pa)); dir1.set(g.b, Math.sign(g.pa-g.pb)); }
+    // 2º obrigatório: idem, preferindo o lado oposto ao do 1º jogo de cada um
+    drawRound(order.filter(p=>part[p]>=2), r1, dir1, 1);
+    // extras (amistosos/desafios): faixa dobrada
+    const nx=Math.floor(rnd()*4);
+    for(let i=0;i<nx;i++){
+      if(order.length<2) break;
+      const a=order[Math.floor(rnd()*order.length)];
+      const cand=order.filter(p=>p!==a && Math.abs(pos.get(p)-pos.get(a))<=cfg.band*2 && !faced[k].has(pairKey(a,p)));
+      if(cand.length) addGame(a, cand[Math.floor(rnd()*cand.length)], 2);
+    }
+    // pontos internos do mês (V=10/D=4, 2 melhores) alimentam o ranking do sorteio seguinte
+    const arrPts=new Array(players.length).fill(0);
+    for(const pl of players){
+      const p=pl.id;
+      arrPts[p]=monthGames.filter(g=>g.played&&(g.a===p||g.b===p))
+        .map(g=> g.winner===p? 10 : (g.wo?0:4))
+        .sort((x,y)=>y-x).slice(0,2).reduce((s,v)=>s+v,0);
+    }
+    intM[k]=arrPts;
+  }
+  games.sort((x,y)=> x.k-y.k || x.day-y.day || x.id-y.id);
+}
+
+/* ============ motor de pontos ============ */
+let monthPts={}, gameInfo={}, statusIna=new Set();
+// gameInfo[gameId] = {aPts,bPts,aCounts,bCounts}
+
+function gamePoints(g, p, posBefore){
+  const won = g.winner===p;
+  const opp = g.a===p? g.b : g.a;
+  if(won){
+    let base;
+    if(cfg.model==='sets') base = g.wo? cfg.pts.v20 : (g.sets==='2-0'? cfg.pts.v20 : cfg.pts.v21);
+    else base = g.wo? cfg.pts.woWin : cfg.pts.win;
+    if(cfg.model==='bonus'){
+      const pp=posBefore.get(p), po=posBefore.get(opp);
+      if(po!==undefined && (pp===undefined || po<pp)) base += cfg.pts.bonus;
+    }
+    return base;
+  }
+  if(g.wo) return cfg.pts.lossWO;
+  return cfg.model==='sets'? (g.sets==='2-1'? cfg.pts.d12 : cfg.pts.d02) : cfg.pts.lossPlayed;
+}
+
+function windowKeys(endK){ const a=[]; for(let k=Math.max(endK-11,START_K); k<=endK; k++) a.push(k); return a; }
+function sumWindow(p, endK){ let s=0; for(const k of windowKeys(endK)) s += (monthPts[k]?.[p]||0); return s; }
+function rankPositions(endK){
+  const arr=players.map(p=>({p:p.id, pts:sumWindow(p.id,endK)})).sort((x,y)=>y.pts-x.pts);
+  const map=new Map(); arr.forEach((r,i)=>{ if(r.pts>0) map.set(r.p, i+1); });
+  return map;
+}
+
+function computeAll(){
+  monthPts={}; gameInfo={};
+  const startK=START_K;
+  const byMonth={};
+  for(const g of games){ (byMonth[g.k]=byMonth[g.k]||[]).push(g); }
+  for(let k=startK; k<=CURK; k++){
+    const posBefore = cfg.model==='bonus'? rankPositions(k-1) : new Map();
+    const pts=new Array(players.length).fill(0);
+    for(const pl of players){
+      const p=pl.id;
+      const gs=(byMonth[k]||[]).filter(g=>g.played && (g.a===p||g.b===p));
+      const scored=gs.map(g=>({g, v:gamePoints(g,p,posBefore)}));
+      let counted=new Set(), total=0;
+      if(cfg.extras==='only2'){
+        scored.slice(0,2).forEach(s=>{ counted.add(s.g.id); total+=s.v; });
+      }else if(cfg.extras==='best2'){
+        [...scored].sort((x,y)=>y.v-x.v).slice(0,2).forEach(s=>{ counted.add(s.g.id); total+=s.v; });
+      }else{ // cap
+        scored.forEach(s=>{ counted.add(s.g.id); total+=s.v; });
+        total=Math.min(total, cfg.cap);
+      }
+      if(cfg.missed==='penalty' && k<CURK){
+        const missing=Math.max(0, 2-gs.length);
+        total -= cfg.penalty*missing;
+      }
+      pts[p]=total;
+      for(const s of scored){
+        const gi=gameInfo[s.g.id]=gameInfo[s.g.id]||{};
+        if(s.g.a===p){ gi.aPts=s.v; gi.aCounts=counted.has(s.g.id); } else { gi.bPts=s.v; gi.bCounts=counted.has(s.g.id); }
+      }
+    }
+    monthPts[k]=pts;
+  }
+  // inatividade: dois últimos meses fechados sem jogar
+  statusIna=new Set();
+  if(cfg.missed==='inactive' && CURK-2>=START_K){
+    for(const pl of players){
+      if(pl.joinK>CURK-2) continue;
+      const played=k=> (byMonth[k]||[]).some(g=>g.played && (g.a===pl.id||g.b===pl.id));
+      if(!played(CURK-1) && !played(CURK-2)) statusIna.add(pl.id);
+    }
+  }
+}
+
+function standingsRange(keys){
+  const set=new Set(keys);
+  const rows=players.map(pl=>{
+    const p=pl.id;
+    let w=0,j=0,pts=0;
+    for(const k of keys) pts += (monthPts[k]?.[p]||0);
+    for(const g of games){ if(set.has(g.k) && g.played && (g.a===p||g.b===p)){ j++; if(g.winner===p) w++; } }
+    return {p, name:pl.name, pts, w, j};
+  });
+  rows.sort((x,y)=> y.pts-x.pts || y.w-x.w || (y.j? y.w/y.j:0)-(x.j? x.w/x.j:0) || x.name.localeCompare(y.name));
+  return rows;
+}
+function standings(endK){ return standingsRange(windowKeys(endK)); }
+/*ENGINE-END*/
+
+/* ============ render: ranking ============ */
+let rankMode='window'; // window | race
+function setRankMode(m){ rankMode=m; if(openDetail){ openDetail.remove(); openDetail=null; } renderRank(); }
+function renderRank(){
+  const anoAtual=yOf(CURK);
+  $('rankModeTabs').innerHTML=
+    `<button class="tab ${rankMode==='window'?'active':''}" onclick="setRankMode('window')">Ranking · 12 meses</button>`+
+    `<button class="tab ${rankMode==='race'?'active':''}" onclick="setRankMode('race')">Corrida ${anoAtual}</button>`;
+  if(rankMode==='race') return renderRace();
+  const endK=CURK-1;                       // último mês fechado
+  const rows=standings(endK);
+  const prevPos=new Map();
+  if(endK-1>=START_K){ standings(endK-1).filter(r=>!statusIna.has(r.p)).forEach((r,i)=>prevPos.set(r.p,i+1)); }
+  const act=rows.filter(r=>!statusIna.has(r.p));
+  const ina=rows.filter(r=>statusIna.has(r.p));
+  const defK=CURK-12;
+  const wk=windowKeys(endK);
+  $('rankHead').innerHTML=`<tr><th>#</th><th></th><th class="l">Jogador</th><th>Pontos</th><th>Este mês</th><th>A defender</th><th>Projeção</th><th>J</th><th>V</th><th>Aprov.</th></tr>`;
+  if(defK>=START_K)
+    $('winNote').innerHTML=`Janela em vigor: <b>${kLabel(wk[0])} – ${kLabel(endK)}</b> · os pontos de <b style="color:var(--warn)">${kLabel(defK)}</b> caem no fim de ${kLabelFull(CURK).toLowerCase()} e são substituídos pelos pontos do mês corrente. Em 31/12, a janela cobre exatamente jan–dez: o <b>campeão do ano</b> é o líder dessa foto.`;
+  else
+    $('winNote').innerHTML=`<b>Ranking em formação</b> — temporada iniciada em ${kLabelFull(START_K).toLowerCase()}: janela atual <b>${kLabel(wk[0])} – ${kLabel(endK)}</b> (${wk.length} ${wk.length>1?'meses':'mês'}). Ainda não há pontos a defender; a defesa mensal começa quando a janela completar 12 meses.`;
+  const tb=$('rankBody'); tb.innerHTML='';
+  let pos=0;
+  const mkRow=(r, isIna)=>{
+    pos++;
+    const tr=document.createElement('tr');
+    tr.className='prow'+(pos===1&&!isIna?' top1':'')+(isIna?' inactive':'');
+    const esteMes=monthPts[CURK]?.[r.p]||0;
+    const aDef=monthPts[defK]?.[r.p]||0;
+    const proj=r.pts-aDef+esteMes;
+    const d=proj-r.pts;
+    const pp=prevPos.get(r.p);
+    let mov='<span class="eq">=</span>';
+    if(!isIna && pp){ if(pp>pos) mov=`<span class="up">▲${pp-pos}</span>`; else if(pp<pos) mov=`<span class="dn">▼${pos-pp}</span>`; }
+    if(isIna) mov='';
+    tr.innerHTML=`
+      <td class="pos">${isIna?'—':pos}</td>
+      <td class="mov">${mov}</td>
+      <td class="l pname-cell">${esc(r.name)} ${players[r.p].joinK>CURK?'<span class="btag new">ESTREIA '+kLabel(players[r.p].joinK)+'</span>':''} ${isIna?'<span class="btag ina">INATIVO</span>':''}</td>
+      <td class="ptsmain">${r.pts}</td>
+      <td class="subcol">${esteMes||'–'}</td>
+      <td class="subcol">${aDef? aDef+' <span class="btag def">'+kLabel(defK)+'</span>':'–'}</td>
+      <td>${proj} <span class="delta ${d>0?'up':d<0?'dn':'eq'}">${d>0?'+':''}${d}</span></td>
+      <td class="subcol">${r.j}</td>
+      <td class="subcol">${r.w}</td>
+      <td class="subcol">${r.j? Math.round(100*r.w/r.j)+'%':'–'}</td>`;
+    tr.onclick=()=>toggleDetail(tr, r.p, 10);
+    tb.appendChild(tr);
+  };
+  act.forEach(r=>mkRow(r,false));
+  ina.forEach(r=>mkRow(r,true));
+  $('summaryPill').innerHTML=`<b>${act.length}</b> no ranking · líder <b>${act[0]?esc(act[0].name.split(' ')[0]):'—'}</b> · ${kLabel(CURK)} em disputa`;
+  renderSponsors();
+}
+function renderSponsors(){
+  const el=$('sponsorStrip');
+  if(!cfg.sponsors.length){ el.style.display='none'; return; }
+  el.style.display='block';
+  el.innerHTML='<span class="det-title" style="margin-right:14px;">Apoio</span>'+
+    cfg.sponsors.map(sp=>`<span class="sp-item">${sp.img?`<img src="${sp.img}" alt="">`:''}${esc(sp.name)}</span>`).join('');
+}
+function renderRace(){
+  const jan=Math.max(kOf(yOf(CURK),0), START_K);
+  const keys=[]; for(let k=jan;k<=CURK;k++) keys.push(k);
+  renderSponsors();
+  const rows=standingsRange(keys);
+  const prev=standingsRange(keys.slice(0,-1));
+  const prevPos=new Map(); prev.filter(r=>!statusIna.has(r.p)).forEach((r,i)=>prevPos.set(r.p,i+1));
+  const act=rows.filter(r=>!statusIna.has(r.p));
+  const ina=rows.filter(r=>statusIna.has(r.p));
+  $('rankHead').innerHTML=`<tr><th>#</th><th></th><th class="l">Jogador</th><th>Pontos no ano</th><th>Este mês</th><th>J</th><th>V</th><th>Aprov.</th></tr>`;
+  $('winNote').innerHTML=`Corrida <b>${yOf(CURK)}</b>: soma só de <b>Jan/${String(yOf(CURK)).slice(2)}</b> até agora (mês corrente incluído). Zera todo dia 1º de janeiro; em 31/12 converge para o ranking de 12 meses e define o <b class="gr">campeão do ano</b>. Movimento comparado à corrida até o mês anterior.`;
+  const tb=$('rankBody'); tb.innerHTML='';
+  let pos=0;
+  const mkRow=(r,isIna)=>{
+    pos++;
+    const tr=document.createElement('tr');
+    tr.className='prow'+(pos===1&&!isIna?' top1':'')+(isIna?' inactive':'');
+    const esteMes=monthPts[CURK]?.[r.p]||0;
+    const pp=prevPos.get(r.p);
+    let mov='<span class="eq">=</span>';
+    if(!isIna && pp){ if(pp>pos) mov=`<span class="up">▲${pp-pos}</span>`; else if(pp<pos) mov=`<span class="dn">▼${pos-pp}</span>`; }
+    if(isIna) mov='';
+    tr.innerHTML=`
+      <td class="pos">${isIna?'—':pos}</td>
+      <td class="mov">${mov}</td>
+      <td class="l pname-cell">${esc(r.name)} ${isIna?'<span class="btag ina">INATIVO</span>':''}</td>
+      <td class="ptsmain">${r.pts}</td>
+      <td class="subcol">${esteMes||'–'}</td>
+      <td class="subcol">${r.j}</td>
+      <td class="subcol">${r.w}</td>
+      <td class="subcol">${r.j? Math.round(100*r.w/r.j)+'%':'–'}</td>`;
+    tr.onclick=()=>toggleDetail(tr, r.p, 8);
+    tb.appendChild(tr);
+  };
+  act.forEach(r=>mkRow(r,false));
+  ina.forEach(r=>mkRow(r,true));
+}
+
+let openDetail=null;
+function toggleDetail(tr, p, cols){
+  if(openDetail){ openDetail.remove(); const was=openDetail.dataset.p; openDetail=null; if(String(p)===was) return; }
+  const det=document.createElement('tr');
+  det.className='detail-row'; det.dataset.p=p;
+  const endK=CURK-1, defK=CURK-12, max=Math.max(1,...windowKeys(endK).concat([CURK]).map(k=>monthPts[k]?.[p]||0));
+  let bars='';
+  for(const k of windowKeys(endK)){
+    const v=monthPts[k]?.[p]||0;
+    bars+=`<div class="barcol ${k===defK?'def':''}"><span class="bv">${v}</span><div class="bar" style="height:${Math.max(2,Math.round(56*v/max))}px"></div><span class="bl">${kLabel(k)}</span></div>`;
+  }
+  const vc=monthPts[CURK]?.[p]||0;
+  bars+=`<div class="barcol live"><span class="bv">${vc}</span><div class="bar" style="height:${Math.max(2,Math.round(56*vc/max))}px"></div><span class="bl">${kLabel(CURK)}</span></div>`;
+  const gs=games.filter(g=>g.k===CURK && (g.a===p||g.b===p));
+  let gl=gs.length? '' : '<li>Nenhum jogo no mês corrente.</li>';
+  for(const g of gs){
+    const opp=esc(players[g.a===p?g.b:g.a].name);
+    if(!g.played){ gl+=`<li>vs <b>${opp}</b> — <span style="color:var(--faint)">agendado (dia ${g.day})</span></li>`; continue; }
+    const won=g.winner===p;
+    const gi=gameInfo[g.id]||{}; const pts=g.a===p? gi.aPts : gi.bPts; const counts=g.a===p? gi.aCounts : gi.bCounts;
+    gl+=`<li>${won?'<b style="color:var(--green)">V</b>':'<b style="color:var(--danger)">D</b>'} vs <b>${opp}</b> ${g.wo?'(W.O.)':(g.score||g.sets)} — <span class="gp">${counts?'+'+pts:'+'+pts+' fora do ranking'}</span></li>`;
+  }
+  det.innerHTML=`<td colspan="${cols||10}"><div class="det-grid">
+    <div><div class="det-title">Pontos por mês · <span style="color:var(--warn)">amarelo = a defender</span> · <span style="color:var(--green)">verde = mês corrente (ao vivo)</span></div><div class="bars">${bars}</div></div>
+    <div class="det-games"><div class="det-title">Jogos de ${kLabelFull(CURK)}</div><ul>${gl}</ul></div>
+  </div></td>`;
+  tr.after(det); openDetail=det;
+}
+
+/* ============ render: jogos ============ */
+let selMonth=null;
+function renderMonthTabs(){
+  const wrap=$('monthTabs'); wrap.innerHTML='';
+  for(let k=CURK; k>=Math.max(CURK-12, START_K); k--){
+    const b=document.createElement('button');
+    b.className='tab'+(k===selMonth?' active':'');
+    b.textContent=kLabel(k)+(k===CURK?' · atual':'');
+    b.onclick=()=>{ selMonth=k; renderGames(); };
+    wrap.appendChild(b);
+  }
+}
+function renderGames(){
+  if(selMonth===null) selMonth=CURK;
+  renderMonthTabs();
+  const list=$('gamesList'); list.innerHTML='';
+  const gs=games.filter(g=>g.k===selMonth);
+  if(!gs.length) list.innerHTML='<div class="grow" style="color:var(--faint)">Sem jogos neste mês.</div>';
+  for(const g of gs){
+    const row=document.createElement('div'); row.className='grow';
+    const na=esc(players[g.a].name), nb=esc(players[g.b].name);
+    const ra=`<span class="rk">#${g.pa}</span>`, rb=`<span class="rk">#${g.pb}</span>`;
+    const abtn=`<button class="btn bsm" onclick="openRes(${g.id})">${g.played?'Editar':'Lançar'}</button>`;
+    if(!g.played){
+      row.innerHTML=`<span class="gday">dia ${g.day}</span><span class="gvs">${ra} ${na} × ${rb} ${nb}</span><span class="gres pend">agendado</span>${abtn}`;
+    }else{
+      const gi=gameInfo[g.id]||{};
+      const wa=g.winner===g.a;
+      row.innerHTML=`<span class="gday">dia ${g.day}</span>
+        <span class="gvs">${ra} ${wa?`<span class="w">${na}</span>`:na} × ${rb} ${!wa?`<span class="w">${nb}</span>`:nb}</span>
+        <span class="gres ${g.wo?'wo':''}">${g.wo?'W.O.':(g.score||'sets '+g.sets)}</span>
+        <span class="gpts"><b>${gi.aPts>=0?'+':''}${gi.aPts??0}</b> / <b>${gi.bPts>=0?'+':''}${gi.bPts??0}</b></span>
+        ${(gi.aCounts===false||gi.bCounts===false)?'<span class="gskip">'+(gi.aCounts===false?na.split(' ')[0]:nb.split(' ')[0])+': fora do ranking</span>':''}${abtn}`;
+    }
+    list.appendChild(row);
+  }
+  // pendências
+  const box=$('pendBox');
+  const pend=[];
+  for(const pl of players){
+    if(pl.joinK>selMonth) continue;
+    const done=gs.filter(g=>g.played && (g.a===pl.id||g.b===pl.id)).length;
+    if(done<2) pend.push({n:pl.name, falta:2-done});
+  }
+  if(pend.length){
+    const isCur=selMonth===CURK;
+    box.style.display='block';
+    box.innerHTML=`<div class="det-title">${isCur?'Jogos obrigatórios pendentes':'Fecharam o mês com jogos faltando'}</div>`+
+      pend.map(x=>`<span class="pi">${x.n} — falta${x.falta>1?'m':''} <b>${x.falta}</b></span>`).join('');
+  }else box.style.display='none';
+}
+
+/* ============ render: config ============ */
+const MODEL_OPTS=[
+  {v:'fixed', t:'Fixo e simples', d:'Vitória e derrota valem pontos fixos; W.O. tem valores próprios.'},
+  {v:'bonus', t:'Fixo + bônus por surpresa', d:'Igual ao fixo, com bônus ao vencer alguém melhor ranqueado no início do mês.'},
+  {v:'sets',  t:'Por sets', d:'O placar em sets define os pontos: V 2-0, V 2-1, D 1-2 e D 0-2 têm valores distintos.'}
+];
+const EXTRAS_OPTS=[
+  {v:'only2', t:'Só os 2 obrigatórios pontuam', d:'Jogos extras são amistosos: aparecem no histórico, mas valem 0.'},
+  {v:'best2', t:'Valem os 2 melhores do mês', d:'Jogar mais nunca prejudica — contam os 2 jogos de maior pontuação.'},
+  {v:'cap',   t:'Todos pontuam, com teto', d:'Soma tudo até o limite configurado.'}
+];
+const MISSED_OPTS=[
+  {v:'zero',     t:'Vale 0, sem punição', d:'Quem não joga simplesmente não pontua no mês.'},
+  {v:'penalty',  t:'Penalidade por jogo faltante', d:'Desconto no mês para cada obrigatório não realizado.'},
+  {v:'inactive', t:'0 + inativo após 2 meses', d:'Dois meses fechados sem jogar tiram o jogador da lista ativa até voltar.'}
+];
+function selField(label, name, opts, sel){
+  const o=opts.find(x=>x.v===sel);
+  return `<div class="wide"><label>${label}</label><select onchange="setOpt('${name}',this.value)">`+
+    opts.map(x=>`<option value="${x.v}" ${x.v===sel?'selected':''}>${x.t}</option>`).join('')+
+    `</select><div class="hint">${o?o.d:''}</div></div>`;
+}
+const LIM={'pts.win':[0,100],'pts.lossPlayed':[0,100],'pts.lossWO':[-50,100],'pts.woWin':[0,100],'pts.bonus':[0,50],
+           'pts.v20':[0,100],'pts.v21':[0,100],'pts.d12':[0,100],'pts.d02':[0,100],
+           'cap':[1,300],'penalty':[0,50],'band':[1,15],'norepeat':[0,12]};
+function numField(label, path, hint){
+  const val=path.split('.').reduce((o,k)=>o[k],cfg);
+  const [mn,mx]=LIM[path]||[0,999];
+  return `<div><label>${label}</label><input type="number" min="${mn}" max="${mx}" value="${val}" onchange="setNum('${path}',this.value)">${hint?`<div class="hint">${hint}</div>`:''}</div>`;
+}
+function renderConfig(){
+  let pf='';
+  if(cfg.model==='sets'){
+    pf=numField('Vitória 2-0','pts.v20')+numField('Vitória 2-1','pts.v21')+numField('Derrota 1-2','pts.d12')+numField('Derrota 0-2','pts.d02')+numField('Derrota por W.O.','pts.lossWO','Quem deu o W.O.');
+  }else{
+    pf=numField('Vitória','pts.win')+numField('Derrota em quadra','pts.lossPlayed')+numField('Vitória por W.O.','pts.woWin')+numField('Derrota por W.O.','pts.lossWO','Quem deu o W.O.');
+    if(cfg.model==='bonus') pf+=numField('Bônus por surpresa','pts.bonus','Ao vencer alguém acima no ranking');
+  }
+  $('rowModel').innerHTML=selField('Modelo','model',MODEL_OPTS,cfg.model)+pf;
+  $('rowExtras').innerHTML=selField('Regra','extras',EXTRAS_OPTS,cfg.extras)+(cfg.extras==='cap'? numField('Teto mensal (pontos)','cap') : '');
+  $('rowMissed').innerHTML=selField('Consequência','missed',MISSED_OPTS,cfg.missed)+(cfg.missed==='penalty'? numField('Desconto por jogo','penalty','Só em mês fechado') : '');
+  $('drawFields').innerHTML= numField('Faixa do sorteio (posições)','band','Adversário até X acima/abaixo')+numField('Não repetir adversário (meses)','norepeat','0 desliga a restrição');
+  $('brandFields').innerHTML=
+    `<div class="wide"><label>Título do ranking</label><input maxlength="40" value="${esc(cfg.title)}" onchange="setTitle(this.value)"></div>`+
+    `<div class="wide"><label>Início do ranking</label><input type="month" value="${cfg.startYm}" onchange="setStart(this.value)"><div class="hint">Refaz o histórico da demonstração</div></div>`;
+  $('sponsorList').innerHTML=cfg.sponsors.map((sp,i)=>
+    `<span class="sp-chip">${sp.img?`<img src="${sp.img}" alt="">`:''}${esc(sp.name)}<button title="Remover" onclick="rmSponsor(${i})">×</button></span>`).join('')||'<span class="hint">Nenhum patrocinador cadastrado.</span>';
+}
+function setTitle(v){ cfg.title=(v||'').replace(/\s+/g,' ').trim().slice(0,40)||'Tennis T11 · Ranking'; save(); document.querySelector('header h1').textContent=cfg.title; toast('Título atualizado'); }
+function setStart(v){ if(!/^\d{4}-\d{2}$/.test(v)) return; cfg.startYm=v; save(); rebuild(); refresh(); toast('Temporada redefinida — histórico regerado'); }
+let spImg=null;
+function spPick(inp){
+  const f=inp.files && inp.files[0]; inp.value=''; if(!f) return;
+  if(f.size>300*1024){ toast('Logo muito grande — use imagem de até 300 KB'); return; }
+  const r=new FileReader();
+  r.onload=()=>{ if(!/^data:image\//.test(r.result)){ toast('Arquivo não é uma imagem'); return; } spImg=r.result; $('spPicked').textContent='logo carregado ✓'; };
+  r.readAsDataURL(f);
+}
+function addSponsor(){
+  const n=$('spName').value.replace(/\s+/g,' ').trim().slice(0,24);
+  if(n.length<2){ toast('Dê um nome ao patrocinador'); return; }
+  cfg.sponsors.push({name:n, img:spImg});
+  spImg=null; $('spName').value=''; $('spPicked').textContent='';
+  save(); refresh(); toast('Patrocinador adicionado');
+}
+function rmSponsor(i){ cfg.sponsors.splice(i,1); save(); refresh(); }
+function setOpt(name,v){ cfg[name]=v; save(); refresh(); toast('Regra atualizada — ranking recalculado'); }
+function setNum(path,v){
+  const ks=path.split('.'); let o=cfg; for(let i=0;i<ks.length-1;i++) o=o[ks[i]];
+  let n=parseInt(v,10); if(isNaN(n)) n=0;
+  const [mn,mx]=LIM[path]||[0,999];
+  n=Math.min(mx, Math.max(mn, n));
+  o[ks[ks.length-1]]=n; save();
+  if(path==='band'||path==='norepeat'){ rebuild(); refresh(); toast('Sorteio refeito com a nova regra'); return; }
+  refresh(); toast('Pontuação atualizada — ranking recalculado');
+}
+function reseed(){ cfg.seed=Math.floor(Math.random()*1e6); save(); rebuild(); refresh(); toast('Novo histórico de demonstração gerado'); }
+function resetCfg(){ const seed=cfg.seed; cfg=JSON.parse(JSON.stringify(DEF_CFG)); cfg.seed=seed; save(); refresh(); toast('Regras padrão restauradas'); }
+
+/* ============ render: jogadores ============ */
+function addPlayer(){
+  const n=$('npName').value.replace(/\s+/g,' ').trim().slice(0,30);
+  if(n.length<3){ toast('Nome do jogador precisa de ao menos 3 letras'); return; }
+  if(players.some(p=>p.name.toLowerCase()===n.toLowerCase())){ toast('Já existe um jogador com esse nome'); return; }
+  const nk=CURK+1;
+  playersX.push({name:n, joinYm: yOf(nk)+'-'+String(mOf(nk)+1).padStart(2,'0')});
+  savePlayersX(); $('npName').value='';
+  rebuild(); refresh();
+  toast(n.split(' ')[0]+' inscrito — entra no sorteio de '+kLabel(nk));
+}
+function rmPlayerX(i){
+  const n=playersX[i].name;
+  playersX.splice(i,1); savePlayersX(); rebuild(); refresh();
+  toast(n.split(' ')[0]+' removido da lista de inscritos');
+}
+function renderPlayers(){
+  $('joinNote').textContent='Quem se inscreve agora entra sem pontos e participa a partir do sorteio de '+kLabel(CURK+1)+'.';
+  const endK=CURK-1;
+  const rows=standings(endK);
+  const posOf=new Map(); rows.filter(r=>!statusIna.has(r.p)).forEach((r,i)=>posOf.set(r.p,i+1));
+  const list=$('playersList'); list.innerHTML='';
+  const ordered=[...players].sort((a,b)=> (posOf.get(a.id)||999)-(posOf.get(b.id)||999) || a.name.localeCompare(b.name));
+  for(const pl of ordered){
+    const st=rows.find(r=>r.p===pl.id);
+    const deb=pl.joinK>CURK;
+    const xi=pl.custom? playersX.findIndex(px=>px.name===pl.name) : -1;
+    const div=document.createElement('div'); div.className='prow-p';
+    div.innerHTML=`<span class="pn">${deb||statusIna.has(pl.id)?'':'#'+(posOf.get(pl.id)||'–')+' '} ${esc(pl.name)}</span>
+      ${deb?`<span class="btag new">ESTREIA ${kLabel(pl.joinK)}</span>`:''}
+      ${statusIna.has(pl.id)?'<span class="btag ina">INATIVO</span>':''}
+      <span class="pm">desde ${kLabel(Math.max(pl.joinK,START_K))}</span>
+      <span class="pm">${st? st.pts+' pts · '+st.j+' jogos na janela':''}</span>
+      ${deb&&pl.custom?`<button class="btn bsm" onclick="rmPlayerX(${xi})">Remover</button>`:''}`;
+    list.appendChild(div);
+  }
+}
+
+/* ============ render: regras (padrão help-card do torneio) ============ */
+function renderRules(){
+  const P=cfg.pts;
+  let scoring='';
+  if(cfg.model==='sets') scoring=`O placar define os pontos: <b>vitória 2-0 vale ${P.v20}</b>, vitória 2-1 vale <b>${P.v21}</b>, derrota 1-2 vale <b>${P.d12}</b> e derrota 0-2 vale <b>${P.d02}</b>. Vitória por W.O. conta como 2-0; quem dá o W.O. recebe <b>${P.lossWO}</b>.`;
+  else{
+    scoring=`<b>Vitória vale ${P.win}</b> e derrota jogada em quadra vale <b>${P.lossPlayed}</b> — quem cumpre a agenda nunca sai zerado. Vitória por W.O. vale <b>${P.woWin}</b>; quem dá o W.O. recebe <b>${P.lossWO}</b>.`;
+    if(cfg.model==='bonus') scoring+=` Vencer alguém melhor ranqueado no início do mês rende <b>+${P.bonus}</b> de bônus.`;
+  }
+  const extras= cfg.extras==='only2'? 'Apenas os <b>2 jogos obrigatórios</b> pontuam; partidas extras são amistosas.' :
+    cfg.extras==='best2'? 'Contam os <b>2 melhores resultados</b> do mês — jogar mais nunca prejudica.' :
+    `Todos os jogos pontuam, limitados ao teto de <b>${cfg.cap}</b> pontos por mês.`;
+  const missed= cfg.missed==='zero'? 'Jogo obrigatório não realizado vale <b>0</b>, sem punição adicional.' :
+    cfg.missed==='penalty'? `Cada jogo obrigatório não realizado desconta <b>${cfg.penalty}</b> pontos no fechamento do mês.` :
+    'Jogo não realizado vale 0; quem fecha <b>2 meses seguidos sem jogar</b> fica <b>inativo</b> e sai da lista ativa até voltar a jogar.';
+  $('rulesBody').innerHTML=`
+    <div class="card help-card">
+      <h4>1. 🗓 Janela rolante de 12 meses</h4>
+      <ul>
+        <li><span class="n">1.1</span>O ranking soma os pontos dos <b>últimos 12 meses fechados</b>.</li>
+        <li><span class="n">1.2</span>Cada mês é <b>defendido no mesmo mês do ano seguinte</b>: no fechamento de ${kLabelFull(CURK).toLowerCase()}, os pontos de ${kLabel(CURK-12)} saem e entram os pontos feitos agora.</li>
+        <li><span class="n">1.3</span>A coluna <b>Projeção</b> antecipa a troca: pontos atuais − a defender + pontos do mês corrente.</li>
+        <li><span class="n">1.4</span>Em 31/12 a janela cobre exatamente jan–dez: o <b>campeão do ano</b> é o líder dessa foto. A aba <b>Corrida</b> mostra essa disputa ao longo do ano, zerando em 1º de janeiro.</li>
+        <li><span class="n">1.5</span>A temporada começou em <b>${kLabelFull(START_K).toLowerCase()}</b> — meses anteriores não existem para o ranking; a janela fica em formação até completar 12 meses.</li>
+      </ul>
+    </div>
+    <div class="card help-card">
+      <h4>2. 🎾 Jogos obrigatórios e sorteio</h4>
+      <ul>
+        <li><span class="n">2.1</span>Cada jogador tem <b>2 jogos obrigatórios por mês</b> — os 2 primeiros do mês.</li>
+        <li><span class="n">2.2</span>Adversários sorteados numa faixa de até <b>${cfg.band}</b> posiç${cfg.band>1?'ões':'ão'} no ranking vigente, entre os inscritos do mês; o sistema busca <b>um adversário acima e um abaixo</b>.</li>
+        <li><span class="n">2.3</span>${cfg.norepeat>0? `O sorteio evita repetir adversário dos últimos <b>${cfg.norepeat}</b> ${cfg.norepeat>1?'meses':'mês'}.` : 'Sem restrição de repetição de adversário.'} Se faixa e repetição travarem o pareamento, relaxa-se primeiro a repetição, depois a faixa.</li>
+        <li><span class="n">2.4</span><b>Jogos extras (desafios)</b> podem sair de uma faixa dobrada.</li>
+        <li><span class="n">2.5</span><b>Novos inscritos</b> entram a qualquer momento, sem limite de vagas: começam com 0 pontos e participam a partir do <b>sorteio do mês seguinte</b> à inscrição.</li>
+      </ul>
+    </div>
+    <div class="card help-card">
+      <h4>3. 🧮 Pontuação por jogo</h4>
+      <ul><li><span class="n">3.1</span>${scoring}</li></ul>
+    </div>
+    <div class="card help-card">
+      <h4>4. ➕ Jogos além dos obrigatórios</h4>
+      <ul><li><span class="n">4.1</span>${extras}</li></ul>
+    </div>
+    <div class="card help-card">
+      <h4>5. ⏳ Mês incompleto</h4>
+      <ul>
+        <li><span class="n">5.1</span>${missed}</li>
+        <li><span class="n">5.2</span>O <b>mês corrente</b> não sofre penalidade enquanto estiver aberto.</li>
+      </ul>
+    </div>
+    <div class="card help-card">
+      <h4>6. ⚖️ Desempate</h4>
+      <ul><li><span class="n">6.1</span>1º pontos na janela · 2º vitórias · 3º aproveitamento · 4º ordem alfabética.</li></ul>
+    </div>`;
+}
+
+/* ============ fade dinâmico da navegação ============ */
+(function(){
+  const nav=$('viewNav');
+  function navFade(){
+    const max=nav.scrollWidth-nav.clientWidth;
+    nav.classList.toggle('fade-l', nav.scrollLeft>4);
+    nav.classList.toggle('fade-r', nav.scrollLeft<max-4);
+  }
+  nav.addEventListener('scroll', navFade, {passive:true});
+  addEventListener('resize', navFade);
+  requestAnimationFrame(navFade);
+})();
+
+/* ============ resultados lançados manualmente ============ */
+// Sobrepõem os dados de demonstração e persistem em localStorage,
+// atrelados ao sorteio vigente (seed + regras de sorteio).
+let ov=null, resGid=null, woChoice=0; // 0 = jogo em quadra, 1 = W.O. do A, 2 = W.O. do B
+function ovSig(){ return cfg.seed+'|'+cfg.band+'|'+cfg.norepeat+'|'+cfg.startYm; }
+function loadOv(){ try{ const s=JSON.parse(localStorage.getItem('t11_ranking_ov_v1')); if(s && s.sig===ovSig()) return s; }catch(e){} return {sig:ovSig(), map:{}}; }
+function saveOv(){ ov.sig=ovSig(); try{ localStorage.setItem('t11_ranking_ov_v1', JSON.stringify(ov)); }catch(e){} }
+function applyOv(){ for(const id in ov.map){ const g=games.find(x=>String(x.id)===id); if(g) Object.assign(g, ov.map[id]); } }
+function rebuild(){ genData(); ov=loadOv(); applyOv(); }
+
+function openRes(gid){
+  resGid=gid;
+  const g=games.find(x=>x.id===gid);
+  const na=esc(players[g.a].name), nb=esc(players[g.b].name);
+  $('resTitle').textContent=g.played?'Editar resultado':'Lançar resultado';
+  $('resSub').textContent=`${na} × ${nb} · ${kLabel(g.k)} · dia ${g.day}`;
+  woChoice = g.played && g.wo ? (g.winner===g.b?1:2) : 0;
+  renderWoSel(na,nb);
+  const sc=(g.score||'').split(' ');
+  let grid=`<span></span><span class="shead">${na.split(' ')[0]}</span><span></span><span class="shead">${nb.split(' ')[0]}</span>`;
+  for(let i=0;i<3;i++){
+    const [a,b]=(sc[i]||'').split('-');
+    const mx=i<2?9:99, dg=i<2?1:2;
+    grid+=`<span class="slabel">${i<2?(i+1)+'º set':'Super TB'}</span>
+      <input type="number" inputmode="numeric" min="0" max="${mx}" oninput="this.value=this.value.replace(/\\D/g,'').slice(0,${dg})" id="sa${i}" value="${g.wo?'':(a??'')}">
+      <span class="x">×</span>
+      <input type="number" inputmode="numeric" min="0" max="${mx}" oninput="this.value=this.value.replace(/\\D/g,'').slice(0,${dg})" id="sb${i}" value="${g.wo?'':(b??'')}">`;
+  }
+  $('setsGrid').innerHTML=grid;
+  $('setsGrid').classList.toggle('off', woChoice!==0);
+  $('resClear').style.display = ov.map[gid] ? '' : 'none';
+  $('resOverlay').classList.add('open');
+}
+function renderWoSel(na,nb){ na=esc(na); nb=esc(nb);
+  $('woSel').innerHTML=[['Jogo disputado em quadra',0],[`W.O. de ${na.split(' ')[0]} (vitória de ${nb.split(' ')[0]})`,1],[`W.O. de ${nb.split(' ')[0]} (vitória de ${na.split(' ')[0]})`,2]]
+    .map(([t,v])=>`<div class="wopt ${woChoice===v?'sel':''}" onclick="setWo(${v})">${t}</div>`).join('');
+}
+function setWo(v){
+  woChoice=v;
+  const g=games.find(x=>x.id===resGid);
+  renderWoSel(players[g.a].name, players[g.b].name);
+  $('setsGrid').classList.toggle('off', v!==0);
+}
+function closeRes(){ $('resOverlay').classList.remove('open'); resGid=null; }
+function saveRes(){
+  const g=games.find(x=>x.id===resGid);
+  let patch;
+  if(woChoice!==0){
+    patch={played:true, wo:true, winner: woChoice===1? g.b : g.a, sets:'2-0', score:''};
+  }else{
+    let wa=0, wb=0, parts=[];
+    for(let i=0;i<3;i++){
+      const a=$('sa'+i).value.trim(), b=$('sb'+i).value.trim();
+      if(a==='' && b==='') continue;
+      const lbl=i<2?(i+1)+'º set':'super tiebreak';
+      if(a==='' || b==='' || +a===+b){ toast('Placar inválido no '+lbl); return; }
+      const mx=i<2?9:99;
+      if(!/^\d+$/.test(a) || !/^\d+$/.test(b) || +a>mx || +b>mx){ toast(i<2?'Sets têm no máximo 1 dígito':'Super tiebreak tem no máximo 2 dígitos'); return; }
+      (+a>+b)? wa++ : wb++;
+      parts.push(a+'-'+b);
+    }
+    if(wa<2 && wb<2){ toast('Resultado incompleto — alguém precisa fechar 2 sets'); return; }
+    if(wa===wb){ toast('Placar sem vencedor definido'); return; }
+    patch={played:true, wo:false, winner: wa>wb? g.a : g.b, sets:(Math.min(wa,wb)===0?'2-0':'2-1'), score:parts.join(' ')};
+  }
+  ov.map[g.id]=patch; saveOv();
+  Object.assign(g, patch);
+  closeRes(); refresh();
+  toast('Resultado salvo — ranking recalculado');
+}
+function clearRes(){
+  delete ov.map[resGid]; saveOv();
+  closeRes(); rebuild(); refresh();
+  toast('Resultado removido — restaurado o valor da demonstração');
+}
+
+/* ============ boot ============ */
+function refresh(){ computeAll(); renderRank(); renderGames(); renderPlayers(); renderConfig(); renderRules(); }
+document.querySelector('header h1').textContent=cfg.title;
+rebuild(); refresh();
+</script>
+</body>
+</html>
